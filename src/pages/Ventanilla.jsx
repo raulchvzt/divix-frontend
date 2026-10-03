@@ -1,9 +1,15 @@
+import { useState } from 'react'
 import { ArrowDownLeft, ArrowUpRight, TrendingUp, Wallet, Clock } from 'lucide-react'
 import StatCard from '../components/ventanilla/StatCard'
 import OperacionRapida from '../components/ventanilla/OperacionRapida'
+import DivixAI from '../components/ventanilla/DivixAI'
 import { dinero } from '../utils/formato'
+import TablaTransacciones from '../components/ventanilla/TablaTransacciones'
 
 export default function Ventanilla() {
+
+    const [mostrarIA, setMostrarIA] = useState(true)
+
   return (
     <div>
       {/* Encabezado */}
@@ -33,9 +39,17 @@ export default function Ventanilla() {
       </div>
 
       {/* Operación rápida (a la derecha irá el panel de Divix AI) */}
-      <div className="grid grid-cols-[1fr_360px] gap-5 items-start">
+           {/* Operación rápida + panel de IA */}
+      <div className={`grid gap-5 items-start ${mostrarIA ? 'grid-cols-[1fr_360px]' : 'grid-cols-1'}`}>
         <OperacionRapida />
+        {mostrarIA && <DivixAI onClose={() => setMostrarIA(false)} />}
       </div>
+
+      {/* Últimas transacciones */}
+      <div className="mt-6">
+        <TablaTransacciones />
+      </div>
+
     </div>
   )
 }

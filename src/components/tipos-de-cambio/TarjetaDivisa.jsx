@@ -1,0 +1,115 @@
+import { useState } from 'react'
+import { Pencil, Check, X, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import { dinero } from '../../utils/formato'
+
+const inputPrecio =
+  'w-full bg-white border border-line rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
+
+export default function TarjetaDivisa({ divisa, onGuardar }) {
+  const [editando, setEditando] = useState(false)
+  const [compra, setCompra] = useState(String(divisa.compra))
+  const [venta, setVenta] = useState(String(divisa.venta))
+
+  const margen = divisa.venta - divisa.compra
+  const porcentaje = (margen / divisa.compra) * 100
+
+  const cancelar = () => {
+    setCompra(String(divisa.compra))
+    setVenta(String(divisa.venta))
+    setEditando(false)
+  }
+
+  const guardar = () => {
+    const c = parseFloat(compra)
+    const v = parseFloat(venta)
+    if (!c || !v || c <= 0 || v <= 0) return alert('Escribe precios válidos')
+    if (v < c) return alert('El precio de venta no puede ser menor al de compra')
+    onGuardar(divisa.codigo, { compra: c, venta: v })
+    setEditando(false)
+  }
+
+  return (
+    <div className="bg-white border border-line rounded-2xl p-6 shadow-sm">
+      {/* Encabezado */}
+      <div className="flex items-start justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-ink-800 text-white text-sm font-bold flex items-center justify-center">
+            {divisa.codigo}
+          </div>
+          <div>
+            <p className="font-bold">{divisa.nombre}</p>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700 mt-0.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
+              Activa
+            </span>
+          </div>
+        </div>
+
+        {!editando && (
+          <button
+            onClick={() => setEditando(true)}
+            className="flex items-center gap-2 border border-line rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            <Pencil size={16} />
+            Editar
+          </button>
+        )}
+      </div>
+
+      {/* Precios */}
+      <div className="grid grid-cols-2 gap-4 mb-5">
+        <div>
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 mb-2">
+            <ArrowDownLeft size={16} />
+            Compra
+          </p>
+          {editando ? (
+            <input type="number" step="0.01" value={compra} onChange={(e) => setCompra(e.target.value)} className={inputPrecio} />
+          ) : (
+            <p className="text-[28px] font-bold tracking-tight">{dinero(divisa.compra)}</p>
+          )}
+        </div>
+
+        <div>
+          <p className="flex items-center gap-1.5 text-xs font-semibold text-brand-600 mb-2">
+            <ArrowUpRight size={16} />
+            Venta
+          </p>
+          {editando ? (
+            <input type="number" step="0.01" value={venta} onChange={(e) => setVenta(e.target.value)} className={inputPrecio} />
+          ) : (
+            <p className="text-[28px] font-bold tracking-tight">{dinero(divisa.venta)}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Margen */}
+      <div className="flex items-center justify-between bg-brand-50 rounded-xl px-4 py-3">
+        <span className="text-xs font-semibold text-brand-700">Margen por unidad</span>
+        <span className="text-sm font-bold text-brand-700">
+          {dinero(margen)} MXN · {porcentaje.toFixed(2)}%
+        </span>
+      </div>
+
+      {/* Botones de edición */}
+      {editando && (
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <button
+            onClick={cancelar}
+            className="flex items-center justify-center gap-2 border border-line rounded-xl py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
+          >
+            <X size={18} />
+            Cancelar
+          </button>
+          <button
+            onClick={guardar}
+            className="flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl py-3 text-sm font-semibold shadow-lg shadow-brand-600/30 transition-colors"
+          >
+            <Check size={18} />
+            Guardar
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}

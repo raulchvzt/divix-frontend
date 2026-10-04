@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import Ventanilla from './pages/Ventanilla'
+import TiposDeCambio from './pages/TiposDeCambio'
 import Placeholder from './pages/Placeholder'
 
 export default function App() {
@@ -9,10 +10,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Ventanilla />} />
-          <Route
-            path="/tipos-de-cambio"
-            element={<Placeholder seccion="Operación" titulo="Tipos de cambio" descripcion="Administra los precios de compra y venta de cada divisa." />}
-          />
+          <Route path="/tipos-de-cambio" element={<TiposDeCambio />} />
           <Route
             path="/caja"
             element={<Placeholder seccion="Operación" titulo="Caja y cortes" descripcion="Controla el efectivo y realiza el corte de tu turno." />}

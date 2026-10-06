@@ -4,6 +4,7 @@ import Ventanilla from './pages/Ventanilla'
 import TiposDeCambio from './pages/TiposDeCambio'
 import Placeholder from './pages/Placeholder'
 import Login from './pages/Login.jsx'
+import Caja from './pages/Caja'
 
 
 export default function App() {
@@ -16,7 +17,7 @@ export default function App() {
           <Route path="/tipos-de-cambio" element={<TiposDeCambio />} />
           <Route
             path="/caja"
-            element={<Placeholder seccion="Operación" titulo="Caja y cortes" descripcion="Controla el efectivo y realiza el corte de tu turno." />}
+            element={<Caja />}
           />
           <Route
             path="/operaciones"

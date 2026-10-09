@@ -6,6 +6,7 @@ import Placeholder from './pages/Placeholder'
 import Login from './pages/Login.jsx'
 import Caja from './pages/Caja'
 import Operaciones from './pages/Operaciones.jsx'
+import Configuracion from './pages/Configuracion.jsx'
 
 
 export default function App() {
@@ -22,10 +23,8 @@ export default function App() {
           />
          <Route path="/operaciones" element={<Operaciones />} />
 
-          <Route
-            path="/configuracion"
-            element={<Placeholder seccion="Administración" titulo="Configuración" descripcion="Ajusta usuarios, divisas y preferencias del sistema." />}
-          />
+          <Route path="/configuracion" element={<Configuracion />} />
+
           <Route
             path="/ayuda"
             element={<Placeholder seccion="Administración" titulo="Centro de ayuda" descripcion="Encuentra respuestas y soporte." />}

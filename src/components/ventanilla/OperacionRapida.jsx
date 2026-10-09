@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Calculator, Plus } from 'lucide-react'
-import { divisas, clientes } from '../../data/divisas'
+import { divisas } from '../../data/divisas'
 import { dinero } from '../../utils/formato'
 
 const campo =
@@ -10,7 +10,7 @@ export default function OperacionRapida() {
   const [tipo, setTipo] = useState('venta') // 'compra' | 'venta'
   const [codigo, setCodigo] = useState('USD')
   const [monto, setMonto] = useState('250')
-  const [cliente, setCliente] = useState(clientes[0])
+ 
 
   const divisa = divisas.find((d) => d.codigo === codigo)
   const tasa = tipo === 'venta' ? divisa.venta : divisa.compra
@@ -81,16 +81,8 @@ export default function OperacionRapida() {
           </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-semibold mb-2">Cliente</label>
-          <select value={cliente} onChange={(e) => setCliente(e.target.value)} className={campo}>
-            {clientes.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
-        </div>
 
-        <div>
+          <div className="col-span-2">
           <label className="block text-sm font-semibold mb-2">Tipo de cambio</label>
           <div className="flex items-center justify-between bg-slate-50 border border-line rounded-xl px-4 py-3.5 text-sm">
             <span className="text-slate-500">1 {codigo} =</span>

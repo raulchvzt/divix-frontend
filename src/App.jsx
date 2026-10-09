@@ -5,6 +5,7 @@ import TiposDeCambio from './pages/TiposDeCambio'
 import Placeholder from './pages/Placeholder'
 import Login from './pages/Login.jsx'
 import Caja from './pages/Caja'
+import Operaciones from './pages/Operaciones.jsx'
 
 
 export default function App() {
@@ -19,10 +20,8 @@ export default function App() {
             path="/caja"
             element={<Caja />}
           />
-          <Route
-            path="/operaciones"
-            element={<Placeholder seccion="Operación" titulo="Operaciones" descripcion="Consulta el historial completo de transacciones." />}
-          />
+         <Route path="/operaciones" element={<Operaciones />} />
+
           <Route
             path="/configuracion"
             element={<Placeholder seccion="Administración" titulo="Configuración" descripcion="Ajusta usuarios, divisas y preferencias del sistema." />}

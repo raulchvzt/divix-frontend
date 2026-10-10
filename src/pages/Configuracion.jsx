@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Building2, Users, Coins } from 'lucide-react'
 import TabNegocio from '../components/configuracion/TabNegocio'
+import TabUsuarios from '../components/configuracion/TabUsuarios'
+import TabDivisas from '../components/configuracion/TabDivisas'
 
 const pestanas = [
   { id: 'negocio', label: 'Negocio', icon: Building2 },
@@ -43,12 +45,11 @@ export default function Configuracion() {
       {/* Contenido */}
       <div className="max-w-4xl">
         {activa === 'negocio' && <TabNegocio />}
+        {activa === 'usuarios' && <TabUsuarios />}
+        {activa === 'divisas' && <TabDivisas />}
+       
 
-        {activa !== 'negocio' && (
-          <div className="bg-white border border-line rounded-2xl p-10 text-center text-slate-400 shadow-sm">
-            Próximamente.
-          </div>
-        )}
+       
       </div>
     </div>
   )

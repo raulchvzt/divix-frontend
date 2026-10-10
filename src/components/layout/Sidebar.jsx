@@ -61,7 +61,7 @@ export default function Sidebar() {
         </div>
         <div className="leading-tight">
           <p className="text-lg font-extrabold">
-            divix<span className="text-brand-600">.</span>
+            Divix<span className="text-brand-600">.</span>
           </p>
           <p className="text-[9px] font-semibold tracking-[0.2em] text-slate-400">
             CONTROL CAMBIARIO

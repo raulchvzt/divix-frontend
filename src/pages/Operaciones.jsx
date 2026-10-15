@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Search, ArrowUpRight, ArrowDownLeft, ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { operaciones } from '../data/operaciones'
+import { listarOperaciones } from '../api/operaciones'
+import { useCarga } from '../api/useCarga'
 import { dinero } from '../utils/formato'
 
 const POR_PAGINA = 6
@@ -38,6 +39,9 @@ function Resumen({ label, value }) {
 }
 
 export default function Operaciones() {
+  const { datos, error, cargando } = useCarga(listarOperaciones)
+  const operaciones = datos ?? []
+  const codigos = [...new Set(operaciones.map((o) => o.divisa))].sort()
   const [busqueda, setBusqueda] = useState('')
   const [tipo, setTipo] = useState('todas')
   const [divisa, setDivisa] = useState('todas')
@@ -116,9 +120,11 @@ export default function Operaciones() {
 
           <select value={divisa} onChange={(e) => cambiar(setDivisa)(e.target.value)} className={filtro}>
             <option value="todas">Todas las divisas</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="CAD">CAD</option>
+            {codigos.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
 
           <input type="date" value={fecha} onChange={(e) => cambiar(setFecha)(e.target.value)} className={filtro} />
@@ -168,7 +174,7 @@ export default function Operaciones() {
             {visibles.length === 0 && (
               <tr>
                 <td colSpan={columnas.length} className="px-6 py-12 text-center text-slate-400">
-                  No hay operaciones con esos filtros.
+                  {cargando ? 'Cargando…' : error || 'No hay operaciones con esos filtros.'}
                 </td>
               </tr>
             )}

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { authenticate, AuthError } from '../services/auth.js'
+import { iniciarSesion } from '../api/auth.js'
+import { ApiError } from '../api/client.js'
 
 export default function LoginForm({ onSuccess }) {
   const [username, setUsername] = useState('')
@@ -28,11 +29,11 @@ export default function LoginForm({ onSuccess }) {
     submitting.current = true
     setLoading(true)
     try {
-      const user = await authenticate({ username: username.trim(), password })
+      const user = await iniciarSesion(username.trim(), password)
       setPassword('')
       onSuccess(user)
     } catch (cause) {
-      setError(cause instanceof AuthError ? cause.message : 'No se pudo conectar con el servicio. Inténtalo más tarde.')
+      setError(cause instanceof ApiError ? cause.message : 'No se pudo conectar con el servicio. Inténtalo más tarde.')
     } finally {
       submitting.current = false
       setLoading(false)

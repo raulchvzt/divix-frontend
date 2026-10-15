@@ -5,27 +5,39 @@ import { dinero } from '../../utils/formato'
 const inputPrecio =
   'w-full bg-white border border-line rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
 
-export default function TarjetaDivisa({ divisa, onGuardar }) {
+export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false }) {
   const [editando, setEditando] = useState(false)
-  const [compra, setCompra] = useState(String(divisa.compra))
-  const [venta, setVenta] = useState(String(divisa.venta))
+  const [error, setError] = useState('')
+  const [guardando, setGuardando] = useState(false)
+  const [compra, setCompra] = useState(divisa.compra == null ? '' : String(divisa.compra))
+  const [venta, setVenta] = useState(divisa.venta == null ? '' : String(divisa.venta))
 
-  const margen = divisa.venta - divisa.compra
-  const porcentaje = (margen / divisa.compra) * 100
+  const sinTasa = divisa.compra == null
+  const margen = sinTasa ? 0 : divisa.venta - divisa.compra
+  const porcentaje = sinTasa ? 0 : (margen / divisa.compra) * 100
 
   const cancelar = () => {
-    setCompra(String(divisa.compra))
-    setVenta(String(divisa.venta))
+    setCompra(sinTasa ? '' : String(divisa.compra))
+    setVenta(sinTasa ? '' : String(divisa.venta))
+    setError('')
     setEditando(false)
   }
 
-  const guardar = () => {
+  const guardar = async () => {
     const c = parseFloat(compra)
     const v = parseFloat(venta)
-    if (!c || !v || c <= 0 || v <= 0) return alert('Escribe precios válidos')
-    if (v < c) return alert('El precio de venta no puede ser menor al de compra')
-    onGuardar(divisa.codigo, { compra: c, venta: v })
-    setEditando(false)
+    if (!c || !v || c <= 0 || v <= 0) return setError('Escribe precios válidos')
+    if (v < c) return setError('El precio de venta no puede ser menor al de compra')
+    setError('')
+    setGuardando(true)
+    try {
+      await onGuardar(divisa, { compra, venta })
+      setEditando(false)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -45,13 +57,13 @@ export default function TarjetaDivisa({ divisa, onGuardar }) {
           </div>
         </div>
 
-        {!editando && (
+        {puedeEditar && !editando && (
           <button
             onClick={() => setEditando(true)}
             className="flex items-center gap-2 border border-line rounded-xl px-3.5 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition-colors"
           >
             <Pencil size={16} />
-            Editar
+            {sinTasa ? 'Asignar precio' : 'Editar'}
           </button>
         )}
       </div>
@@ -66,7 +78,7 @@ export default function TarjetaDivisa({ divisa, onGuardar }) {
           {editando ? (
             <input type="number" step="0.01" value={compra} onChange={(e) => setCompra(e.target.value)} className={inputPrecio} />
           ) : (
-            <p className="text-[28px] font-bold tracking-tight">{dinero(divisa.compra)}</p>
+            <p className="text-[28px] font-bold tracking-tight">{sinTasa ? '—' : dinero(divisa.compra)}</p>
           )}
         </div>
 
@@ -78,7 +90,7 @@ export default function TarjetaDivisa({ divisa, onGuardar }) {
           {editando ? (
             <input type="number" step="0.01" value={venta} onChange={(e) => setVenta(e.target.value)} className={inputPrecio} />
           ) : (
-            <p className="text-[28px] font-bold tracking-tight">{dinero(divisa.venta)}</p>
+            <p className="text-[28px] font-bold tracking-tight">{sinTasa ? '—' : dinero(divisa.venta)}</p>
           )}
         </div>
       </div>
@@ -87,11 +99,13 @@ export default function TarjetaDivisa({ divisa, onGuardar }) {
       <div className="flex items-center justify-between bg-brand-50 rounded-xl px-4 py-3">
         <span className="text-xs font-semibold text-brand-700">Margen por unidad</span>
         <span className="text-sm font-bold text-brand-700">
-          {dinero(margen)} MXN · {porcentaje.toFixed(2)}%
+          {sinTasa ? 'Sin tipo de cambio' : `${dinero(margen)} MXN · ${porcentaje.toFixed(2)}%`}
         </span>
       </div>
 
       {/* Botones de edición */}
+      {error && <p className="text-sm font-medium text-red-600 mt-3">{error}</p>}
+
       {editando && (
         <div className="grid grid-cols-2 gap-3 mt-4">
           <button
@@ -103,10 +117,11 @@ export default function TarjetaDivisa({ divisa, onGuardar }) {
           </button>
           <button
             onClick={guardar}
+            disabled={guardando}
             className="flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl py-3 text-sm font-semibold shadow-lg shadow-brand-600/30 transition-colors"
           >
             <Check size={18} />
-            Guardar
+            {guardando ? 'Guardando…' : 'Guardar'}
           </button>
         </div>
       )}

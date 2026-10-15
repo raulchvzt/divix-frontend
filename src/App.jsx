@@ -7,6 +7,8 @@ import Login from './pages/Login.jsx'
 import Caja from './pages/Caja'
 import Operaciones from './pages/Operaciones.jsx'
 import Configuracion from './pages/Configuracion.jsx'
+import RutaProtegida from './components/RutaProtegida.jsx'
+
 
 
 export default function App() {
@@ -14,7 +16,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
           <Route path="/login" element={<Login />} />
-        <Route element={<Layout />}>
+        <Route element={<RutaProtegida><Layout /></RutaProtegida>}>
           <Route path="/" element={<Ventanilla />} />
           <Route path="/tipos-de-cambio" element={<TiposDeCambio />} />
           <Route
@@ -32,6 +34,7 @@ export default function App() {
         </Route>
       </Routes>
     </BrowserRouter>
+    
   )
 }
 

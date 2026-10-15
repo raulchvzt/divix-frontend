@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Search, MoreHorizontal, Clock, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
-import { transacciones } from '../../data/transacciones'
+import { listarOperaciones } from '../../api/operaciones'
+import { useCarga } from '../../api/useCarga'
 import { dinero } from '../../utils/formato'
 
 function Etiqueta({ tipo }) {
@@ -20,10 +21,11 @@ function Etiqueta({ tipo }) {
 
 const columnas = ['ID / Hora', 'Operación', 'Divisa', 'Monto', 'Tipo de cambio', 'Total MXN', 'Cajero']
 
-export default function TablaTransacciones() {
+export default function TablaTransacciones({ version = 0 }) {
   const [busqueda, setBusqueda] = useState('')
+  const { datos, error } = useCarga(listarOperaciones, [version])
 
-  const filtradas = transacciones.filter((t) =>
+  const filtradas = (datos ?? []).slice(0, 8).filter((t) =>
     `${t.id} ${t.divisa} ${t.tipo} ${t.cajero}`.toLowerCase().includes(busqueda.toLowerCase())
   )
 
@@ -90,7 +92,7 @@ export default function TablaTransacciones() {
           {filtradas.length === 0 && (
             <tr>
               <td colSpan={columnas.length} className="px-6 py-10 text-center text-slate-400">
-                No se encontraron transacciones.
+                {error || 'No se encontraron transacciones.'}
               </td>
             </tr>
           )}

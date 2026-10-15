@@ -1,17 +1,10 @@
 import { useState } from 'react'
 import { Plus, X, Check } from 'lucide-react'
+import { listarMonedas, crearMoneda, activarMoneda, desactivarMoneda } from '../../api/configuracion'
+import { useCarga } from '../../api/useCarga'
 
 const campo =
   'w-full bg-white border border-line rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
-
-// Divisas de ejemplo (después vendrán de la base de datos)
-const iniciales = [
-  { codigo: 'USD', nombre: 'Dólar estadounidense', activa: true },
-  { codigo: 'EUR', nombre: 'Euro', activa: true },
-  { codigo: 'CAD', nombre: 'Dólar canadiense', activa: true },
-  { codigo: 'GBP', nombre: 'Libra esterlina', activa: false },
-  { codigo: 'JPY', nombre: 'Yen japonés', activa: false },
-]
 
 const vacio = { codigo: '', nombre: '' }
 
@@ -33,10 +26,13 @@ function Interruptor({ activo, onClick }) {
 }
 
 export default function TabDivisas() {
-  const [divisas, setDivisas] = useState(iniciales)
+  const [version, setVersion] = useState(0)
+  const { datos, error: errorLista } = useCarga(listarMonedas, [version])
+  const divisas = (datos ?? []).map((m) => ({ id: m.id, codigo: m.codigo, nombre: m.nombre, activa: m.activo }))
   const [mostrarForm, setMostrarForm] = useState(false)
   const [nueva, setNueva] = useState(vacio)
   const [error, setError] = useState('')
+  const [guardando, setGuardando] = useState(false)
 
   const cerrarForm = () => {
     setMostrarForm(false)
@@ -44,7 +40,7 @@ export default function TabDivisas() {
     setError('')
   }
 
-  const agregar = () => {
+  const agregar = async () => {
     const codigo = nueva.codigo.trim().toUpperCase()
     const nombre = nueva.nombre.trim()
 
@@ -53,12 +49,28 @@ export default function TabDivisas() {
     if (codigo === 'MXN') return setError('MXN es la moneda nacional, ya está incluida.')
     if (divisas.some((d) => d.codigo === codigo)) return setError('Esa divisa ya existe.')
 
-    setDivisas([...divisas, { codigo, nombre, activa: true }])
-    cerrarForm()
+    setError('')
+    setGuardando(true)
+    try {
+      await crearMoneda(codigo, nombre)
+      cerrarForm()
+      setVersion((v) => v + 1)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setGuardando(false)
+    }
   }
 
-  const alternar = (codigo) =>
-    setDivisas(divisas.map((d) => (d.codigo === codigo ? { ...d, activa: !d.activa } : d)))
+  const alternar = async (d) => {
+    setError('')
+    try {
+      await (d.activa ? desactivarMoneda(d.id) : activarMoneda(d.id))
+      setVersion((v) => v + 1)
+    } catch (e) {
+      setError(e.message)
+    }
+  }
 
   return (
     <div className="bg-white border border-line rounded-2xl shadow-sm overflow-hidden">
@@ -68,7 +80,7 @@ export default function TabDivisas() {
           <h2 className="text-base font-bold">Divisas disponibles</h2>
           <p className="text-sm text-slate-500 mt-0.5">
             {divisas.filter((d) => d.activa).length} activas de {divisas.length}. Solo las activas aparecen en la
-            Ventanilla.
+            Ventanilla. Una divisa nueva necesita su precio en Tipos de cambio.
           </p>
         </div>
         {!mostrarForm && (
@@ -81,6 +93,10 @@ export default function TabDivisas() {
           </button>
         )}
       </div>
+
+      {(errorLista || (error && !mostrarForm)) && (
+        <p className="mx-6 mb-4 text-sm font-medium text-red-600">{errorLista || error}</p>
+      )}
 
       {/* Formulario */}
       {mostrarForm && (
@@ -125,10 +141,11 @@ export default function TabDivisas() {
             </button>
             <button
               onClick={agregar}
+              disabled={guardando}
               className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl px-5 py-3 text-sm font-semibold transition-colors"
             >
               <Check size={18} />
-              Guardar divisa
+              {guardando ? 'Guardando…' : 'Guardar divisa'}
             </button>
           </div>
         </div>
@@ -195,7 +212,7 @@ export default function TabDivisas() {
               </td>
               <td className="px-6 py-4">
                 <div className="flex justify-end">
-                  <Interruptor activo={d.activa} onClick={() => alternar(d.codigo)} />
+                  <Interruptor activo={d.activa} onClick={() => alternar(d)} />
                 </div>
               </td>
             </tr>

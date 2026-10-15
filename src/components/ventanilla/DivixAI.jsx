@@ -1,4 +1,7 @@
-import { Sparkles, X, Bot, MessageSquare } from 'lucide-react'
+import { useState } from 'react'
+import { Sparkles, X, Bot, Send } from 'lucide-react'
+import { consultarAsistente } from '../../api/operaciones'
+import { obtenerUsuario } from '../../api/auth'
 
 const sugerencias = [
   '¿Cuántos dólares vendimos hoy?',
@@ -6,6 +9,29 @@ const sugerencias = [
 ]
 
 export default function DivixAI({ onClose }) {
+  const [pregunta, setPregunta] = useState('')
+  const [respuesta, setRespuesta] = useState('')
+  const [error, setError] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const nombre = obtenerUsuario()?.nombre?.split(' ')[0] ?? ''
+
+  const preguntar = async (texto) => {
+    const q = texto.trim()
+    if (q.length < 3 || enviando) return
+    setPregunta(q)
+    setError('')
+    setRespuesta('')
+    setEnviando(true)
+    try {
+      const r = await consultarAsistente(q)
+      setRespuesta(r.respuesta)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setEnviando(false)
+    }
+  }
+
   return (
     <aside className="bg-ink-800 text-white rounded-2xl p-6 shadow-lg">
       {/* Encabezado */}
@@ -30,9 +56,7 @@ export default function DivixAI({ onClose }) {
           <Bot size={20} />
         </div>
         <p className="text-sm leading-relaxed text-slate-200">
-          Hola Mariana. Hoy llevas un{' '}
-          <span className="text-brand-500 font-semibold">12% más</span> de ventas que ayer. ¿En qué
-          te ayudo?
+          {enviando ? 'Pensando…' : error || respuesta || `Hola ${nombre}. ¿En qué te ayudo?`}
         </p>
       </div>
 
@@ -41,6 +65,8 @@ export default function DivixAI({ onClose }) {
         {sugerencias.map((s) => (
           <button
             key={s}
+            onClick={() => preguntar(s)}
+            disabled={enviando}
             className="text-left text-xs text-slate-200 bg-ink-900 border border-white/10 hover:border-brand-500/50 rounded-xl px-4 py-3.5 transition-colors"
           >
             {s}
@@ -48,11 +74,29 @@ export default function DivixAI({ onClose }) {
         ))}
       </div>
 
-      {/* Botón */}
-      <button className="w-full flex items-center justify-center gap-2 bg-white text-ink-800 text-sm font-semibold rounded-xl py-3.5 hover:bg-slate-100 transition-colors">
-        <MessageSquare size={20} strokeWidth={1.8} />
-        Abrir conversación
-      </button>
+      {/* Pregunta libre */}
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          preguntar(pregunta)
+        }}
+        className="flex gap-2"
+      >
+        <input
+          value={pregunta}
+          onChange={(e) => setPregunta(e.target.value)}
+          maxLength={1000}
+          placeholder="Escribe tu pregunta…"
+          className="flex-1 min-w-0 bg-ink-900 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-brand-500/60"
+        />
+        <button
+          type="submit"
+          disabled={enviando}
+          className="w-12 flex items-center justify-center bg-white text-ink-800 rounded-xl hover:bg-slate-100 disabled:opacity-50 transition-colors"
+        >
+          <Send size={18} />
+        </button>
+      </form>
     </aside>
   )
 }

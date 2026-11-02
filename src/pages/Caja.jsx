@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Wallet, Vault, ArrowRightLeft, Check } from 'lucide-react'
 import { dinero } from '../utils/formato'
-import { obtenerUsuario } from '../api/auth'
 import { useCarga } from '../api/useCarga'
 import {
   obtenerCorteActivo,
@@ -26,18 +25,6 @@ const inputClase = 'w-full rounded-lg border border-line bg-white px-3 py-2 text
 const botonClase = 'rounded-xl bg-brand-600 px-5 py-3 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-50'
 
 export default function Caja() {
-  if (obtenerUsuario()?.rol === 'supervisor') {
-    return (
-      <div>
-        <h1 className="text-[32px] font-bold tracking-tight">Caja y cortes</h1>
-        <p className="mt-3 text-sm text-slate-500">Tu rol no opera caja. Los cortes los realizan cajeros y administradores.</p>
-      </div>
-    )
-  }
-  return <CajaCajero />
-}
-
-function CajaCajero() {
   const [version, setVersion] = useState(0)
   const { datos: corteActivo, error: errorCarga, cargando } = useCarga(obtenerCorteActivo, [version])
   const { datos: ultimo, cargando: cargandoUltimo } = useCarga(obtenerUltimoCierre, [version])

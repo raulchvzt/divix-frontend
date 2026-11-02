@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { puedeVer } from '../../api/permisos'
 import {
   DollarSign,
   LayoutGrid,
@@ -6,7 +7,6 @@ import {
   Inbox,
   FileText,
   SlidersHorizontal,
-  LifeBuoy,
   ShieldCheck,
 } from 'lucide-react'
 
@@ -19,17 +19,18 @@ const operacion = [
 
 const administracion = [
   { to: '/configuracion', label: 'Configuración', icon: SlidersHorizontal },
-  { to: '/ayuda', label: 'Centro de ayuda', icon: LifeBuoy },
 ]
 
 function NavSection({ title, items }) {
+  const visibles = items.filter((i) => puedeVer(i.to))
+  if (visibles.length === 0) return null
   return (
     <div className="mb-6">
       <p className="px-3 mb-3 text-[11px] font-semibold tracking-[0.15em] text-slate-400 uppercase">
         {title}
       </p>
       <nav className="flex flex-col gap-1">
-        {items.map(({ to, label, icon: Icon }) => (
+        {visibles.map(({ to, label, icon: Icon }) => (
           <NavLink
             key={to}
             to={to}

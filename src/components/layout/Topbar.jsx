@@ -4,7 +4,7 @@ import { obtenerUsuario, cerrarSesion } from '../../api/auth'
 import { corteActivo } from '../../api/operaciones'
 import { useCarga } from '../../api/useCarga'
 
-const ROLES = { administrador: 'Administrador', cajero: 'Cajero', supervisor: 'Supervisor' }
+const ROLES = { administrador: 'Administrador', cajero: 'Cajero' }
 
 const iniciales = (nombre) =>
   nombre.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join('')

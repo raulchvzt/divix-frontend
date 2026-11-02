@@ -1,12 +1,13 @@
 import { Navigate, useNavigate } from 'react-router-dom'
 import LoginForm from '../components/LoginForm.jsx'
 import { obtenerToken } from '../api/client.js'
+import { rutaInicio } from '../api/permisos.js'
 import './Login.css'
 
 export default function Login() {
   const navigate = useNavigate()
 
-  if (obtenerToken()) return <Navigate to="/" replace />
+  if (obtenerToken()) return <Navigate to={rutaInicio()} replace />
 
   return (
     <main className="login-page">
@@ -28,7 +29,7 @@ export default function Login() {
         <section className="login-card" aria-labelledby="login-heading">
           <h1 id="login-heading" tabIndex={-1}>Bienvenido a Divix</h1>
           <p className="card-description">Ingresa tus datos para acceder al sistema.</p>
-          <LoginForm onSuccess={() => navigate('/', { replace: true })} />
+          <LoginForm onSuccess={() => navigate(rutaInicio(), { replace: true })} />
         </section>
         <footer className="login-footer">Acceso para cajeros y administradores</footer>
       </div>

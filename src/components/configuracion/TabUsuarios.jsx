@@ -13,7 +13,7 @@ import { useCarga } from '../../api/useCarga'
 const campo =
   'w-full bg-white border border-line rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
 
-const NOMBRE_ROL = { administrador: 'Administrador', cajero: 'Cajero', supervisor: 'Supervisor' }
+const NOMBRE_ROL = { administrador: 'Administrador', cajero: 'Cajero' }
 const etiquetaRol = (rol) => NOMBRE_ROL[rol?.nombreRol] ?? rol?.nombreRol ?? ''
 const nombreCompleto = (u) => [u.nombre, u.apellidoPaterno, u.apellidoMaterno].filter(Boolean).join(' ')
 
@@ -153,7 +153,7 @@ export default function TabUsuarios() {
             <div>
               <label className="block text-sm font-semibold mb-2">Rol</label>
               <select value={idRol} onChange={(e) => setNuevo({ ...nuevo, idRol: e.target.value })} className={campo}>
-                {(roles ?? []).map((r) => (
+                {(roles ?? []).filter((r) => r.nombreRol in NOMBRE_ROL).map((r) => (
                   <option key={r.id} value={r.id}>
                     {NOMBRE_ROL[r.nombreRol] ?? r.nombreRol}
                   </option>

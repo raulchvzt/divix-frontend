@@ -1,8 +1,7 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
 import Ventanilla from './pages/Ventanilla'
 import TiposDeCambio from './pages/TiposDeCambio'
-import Placeholder from './pages/Placeholder'
 import Login from './pages/Login.jsx'
 import Caja from './pages/Caja'
 import Operaciones from './pages/Operaciones.jsx'
@@ -17,20 +16,12 @@ export default function App() {
       <Routes>
           <Route path="/login" element={<Login />} />
         <Route element={<RutaProtegida><Layout /></RutaProtegida>}>
-          <Route path="/" element={<Ventanilla />} />
-          <Route path="/tipos-de-cambio" element={<TiposDeCambio />} />
-          <Route
-            path="/caja"
-            element={<Caja />}
-          />
-         <Route path="/operaciones" element={<Operaciones />} />
-
-          <Route path="/configuracion" element={<Configuracion />} />
-
-          <Route
-            path="/ayuda"
-            element={<Placeholder seccion="Administración" titulo="Centro de ayuda" descripcion="Encuentra respuestas y soporte." />}
-          />
+          <Route path="/" element={<RutaProtegida ruta="/"><Ventanilla /></RutaProtegida>} />
+          <Route path="/tipos-de-cambio" element={<RutaProtegida ruta="/tipos-de-cambio"><TiposDeCambio /></RutaProtegida>} />
+          <Route path="/caja" element={<RutaProtegida ruta="/caja"><Caja /></RutaProtegida>} />
+          <Route path="/operaciones" element={<RutaProtegida ruta="/operaciones"><Operaciones /></RutaProtegida>} />
+          <Route path="/configuracion" element={<RutaProtegida ruta="/configuracion"><Configuracion /></RutaProtegida>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -13,7 +13,7 @@ export function obtenerUsuario() {
 
 /**
  * Inicia sesión, guarda el token y el usuario, y lo devuelve:
- * { id, nombre, rol } donde rol es "administrador", "cajero" o "supervisor".
+ * { id, nombre, rol } donde rol es "administrador" o "cajero".
  */
 export async function iniciarSesion(usuario, contrasena) {
   const respuesta = await api('/auth/login', {

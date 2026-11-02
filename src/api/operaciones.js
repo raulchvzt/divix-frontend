@@ -55,5 +55,11 @@ export async function obtenerClienteGeneral() {
   })
 }
 
-export const consultarAsistente = (pregunta) =>
-  api('/asistente-ia/consultar', { method: 'POST', body: { pregunta } })
+export const consultarAsistente = (pregunta, idConversacion) =>
+  api('/asistente-ia/consultar', {
+    method: 'POST',
+    body: idConversacion ? { pregunta, idConversacion } : { pregunta },
+  })
+
+export const listarConversaciones = () => api('/asistente-ia/conversaciones')
+export const obtenerConversacion = (id) => api(`/asistente-ia/conversaciones/${encodeURIComponent(id)}`)

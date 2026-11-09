@@ -7,6 +7,7 @@ export const PANTALLAS = {
   '/tipos-de-cambio': { roles: ['administrador', 'cajero'] },
   '/caja': { roles: ['administrador', 'cajero'] },
   '/operaciones': { roles: ['administrador', 'cajero'] },
+  '/estadisticas': { roles: ['administrador', 'cajero'] },
   '/configuracion': { roles: ['administrador'] },
 }
 

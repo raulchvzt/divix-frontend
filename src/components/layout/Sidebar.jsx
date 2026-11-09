@@ -8,6 +8,7 @@ import {
   FileText,
   SlidersHorizontal,
   ShieldCheck,
+  PieChart,
 } from 'lucide-react'
 
 const operacion = [
@@ -15,6 +16,7 @@ const operacion = [
   { to: '/tipos-de-cambio', label: 'Tipos de cambio', icon: BarChart3 },
   { to: '/caja', label: 'Caja y cortes', icon: Inbox },
   { to: '/operaciones', label: 'Operaciones', icon: FileText },
+  { to: '/estadisticas', label: 'Estadísticas', icon: PieChart },
 ]
 
 const administracion = [

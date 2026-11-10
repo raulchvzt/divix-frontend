@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowDownLeft, ArrowUpRight, ListChecks, Wallet, Clock } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, ListChecks, Wallet, Clock, Sparkles } from 'lucide-react'
 import StatCard from '../components/ventanilla/StatCard'
 import OperacionRapida from '../components/ventanilla/OperacionRapida'
 import DivixAI from '../components/ventanilla/DivixAI'
@@ -31,10 +31,21 @@ export default function Ventanilla() {
           </p>
         </div>
 
-        <button onClick={() => navigate('/caja')} className="flex items-center gap-2 bg-white border border-line rounded-xl px-5 py-3 text-sm font-semibold shadow-sm hover:bg-slate-50 transition-colors">
+        <div className="flex items-center gap-3">
+          {!mostrarIA && (
+            <button
+              onClick={() => setMostrarIA(true)}
+              className="flex items-center gap-2 bg-ink-800 text-white rounded-xl px-5 py-3 text-sm font-semibold shadow-sm hover:bg-ink-700 transition-colors"
+            >
+              <Sparkles size={20} className="text-brand-500" />
+              Abrir Divix AI
+            </button>
+          )}
+          <button onClick={() => navigate('/caja')} className="flex items-center gap-2 bg-white border border-line rounded-xl px-5 py-3 text-sm font-semibold shadow-sm hover:bg-slate-50 transition-colors">
           <Clock size={20} strokeWidth={1.8} />
           Realizar corte
-        </button>
+          </button>
+        </div>
       </div>
 
       {/* Tarjetas de resumen */}

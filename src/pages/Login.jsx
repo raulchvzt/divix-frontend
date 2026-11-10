@@ -15,7 +15,7 @@ export default function Login() {
         <header className="brand">
           <div className="brand-mark" aria-hidden="true">D</div>
           <p className="brand-name">Divix</p>
-          <p className="brand-description">Sistema de gestión para centros cambiarios</p>
+          <p className="brand-description">Sistema de gestión para centro cambiario</p>
           <div className="currency-engraving" aria-hidden="true">
             <svg viewBox="0 0 320 220" fill="none">
               {Array.from({ length: 12 }, (_, index) => (
@@ -24,14 +24,12 @@ export default function Login() {
               <path className="exchange-symbol" d="M125 94h76m-17-17 17 17-17 17M195 130h-76m17-17-17 17 17 17" />
             </svg>
           </div>
-          <p className="brand-audience">Acceso para cajeros y administradores</p>
         </header>
         <section className="login-card" aria-labelledby="login-heading">
           <h1 id="login-heading" tabIndex={-1}>Bienvenido a Divix</h1>
           <p className="card-description">Ingresa tus datos para acceder al sistema.</p>
           <LoginForm onSuccess={() => navigate(rutaInicio(), { replace: true })} />
         </section>
-        <footer className="login-footer">Acceso para cajeros y administradores</footer>
       </div>
     </main>
   )

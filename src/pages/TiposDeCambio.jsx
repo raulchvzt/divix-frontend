@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { obtenerDivisas, guardarTipoCambio } from '../api/divisas'
+import { obtenerDivisas, guardarTipoCambio, obtenerReferenciaMercado } from '../api/divisas'
 import { obtenerUsuario } from '../api/auth'
 import { useCarga } from '../api/useCarga'
 import TarjetaDivisa from '../components/tipos-de-cambio/TarjetaDivisa'
@@ -7,6 +7,7 @@ import TarjetaDivisa from '../components/tipos-de-cambio/TarjetaDivisa'
 export default function TiposDeCambio() {
   const [version, setVersion] = useState(0)
   const { datos: divisas, error, cargando } = useCarga(() => obtenerDivisas({ incluirSinTasa: true }), [version])
+  const { datos: mercado } = useCarga(obtenerReferenciaMercado, [version])
   const puedeEditar = obtenerUsuario()?.rol === 'administrador'
 
   const actualizar = async (divisa, { compra, venta }) => {
@@ -23,7 +24,8 @@ export default function TiposDeCambio() {
         </p>
         <h1 className="text-[32px] font-bold tracking-tight mt-2">Tipos de cambio</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Administra los precios de compra y venta de cada divisa.
+          Administra los precios de compra y venta de cada divisa. La referencia del mercado es solo
+          informativa: tú decides el precio.
         </p>
       </div>
 
@@ -35,7 +37,13 @@ export default function TiposDeCambio() {
       )}
       <div className="grid grid-cols-3 gap-5">
         {divisas?.map((d) => (
-          <TarjetaDivisa key={d.codigo} divisa={d} onGuardar={actualizar} puedeEditar={puedeEditar} />
+          <TarjetaDivisa
+            key={d.codigo}
+            divisa={d}
+            onGuardar={actualizar}
+            puedeEditar={puedeEditar}
+            mercado={mercado?.[d.codigo]}
+          />
         ))}
       </div>
     </div>

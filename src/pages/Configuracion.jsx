@@ -43,7 +43,7 @@ export default function Configuracion() {
       </div>
 
       {/* Contenido */}
-      <div className="max-w-4xl">
+      <div key={activa} className="max-w-4xl animar-mensaje">
         {activa === 'negocio' && <TabNegocio />}
         {activa === 'usuarios' && <TabUsuarios />}
         {activa === 'divisas' && <TabDivisas />}

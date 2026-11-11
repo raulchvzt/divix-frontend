@@ -132,7 +132,7 @@ export default function DivixAI({ onClose }) {
   }
 
   return (
-    <aside className="bg-ink-800 text-white rounded-2xl p-6 shadow-lg">
+    <aside className="animar-panel bg-ink-800 text-white rounded-2xl p-6 shadow-lg">
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2 text-brand-500">
@@ -210,13 +210,13 @@ export default function DivixAI({ onClose }) {
 
             {mensajes.map((m, i) =>
               m.rol === 'usuario' ? (
-                <div key={i} className="self-end max-w-[85%] bg-brand-600 rounded-xl rounded-br-sm px-4 py-2.5 text-sm">
+                <div key={i} className="animar-mensaje self-end max-w-[85%] bg-brand-600 rounded-xl rounded-br-sm px-4 py-2.5 text-sm">
                   {m.texto}
                 </div>
               ) : (
                 <div
                   key={i}
-                  className={`flex gap-3 border rounded-xl p-4 ${
+                  className={`animar-mensaje flex gap-3 border rounded-xl p-4 ${
                     m.rol === 'error' ? 'bg-red-500/10 border-red-400/30' : 'bg-ink-700 border-white/10'
                   }`}
                 >
@@ -230,7 +230,13 @@ export default function DivixAI({ onClose }) {
               ),
             )}
 
-            {enviando && <p className="text-sm text-slate-400">Pensando…</p>}
+            {enviando && (
+              <p className="animar-mensaje puntos-cargando text-sm text-slate-400">
+                Pensando<span>.</span>
+                <span>.</span>
+                <span>.</span>
+              </p>
+            )}
             <div ref={fin} />
           </div>
 

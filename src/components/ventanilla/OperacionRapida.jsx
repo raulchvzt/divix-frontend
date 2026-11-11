@@ -4,6 +4,7 @@ import { obtenerDivisas } from '../../api/divisas'
 import { registrarOperacion, obtenerClienteGeneral } from '../../api/operaciones'
 import { useCarga } from '../../api/useCarga'
 import { dinero } from '../../utils/formato'
+import InputNumero from '../InputNumero'
 
 const campo =
   'w-full bg-white border border-line rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
@@ -90,9 +91,7 @@ export default function OperacionRapida({ onRegistrada }) {
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">
               {divisa?.codigo}
             </span>
-            <input
-              type="number"
-              min="0"
+            <InputNumero
               placeholder="0.00"
               value={monto}
               onChange={(e) => setMonto(e.target.value)}

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pencil, Check, X, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { dinero } from '../../utils/formato'
+import InputNumero from '../InputNumero'
 
 const inputPrecio =
   'w-full bg-white border border-line rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
@@ -76,7 +77,7 @@ export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false }
             Compra
           </p>
           {editando ? (
-            <input type="number" step="0.01" value={compra} onChange={(e) => setCompra(e.target.value)} className={inputPrecio} />
+            <InputNumero decimales={4} value={compra} onChange={(e) => setCompra(e.target.value)} className={inputPrecio} />
           ) : (
             <p className="text-[28px] font-bold tracking-tight">{sinTasa ? '—' : dinero(divisa.compra)}</p>
           )}
@@ -88,7 +89,7 @@ export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false }
             Venta
           </p>
           {editando ? (
-            <input type="number" step="0.01" value={venta} onChange={(e) => setVenta(e.target.value)} className={inputPrecio} />
+            <InputNumero decimales={4} value={venta} onChange={(e) => setVenta(e.target.value)} className={inputPrecio} />
           ) : (
             <p className="text-[28px] font-bold tracking-tight">{sinTasa ? '—' : dinero(divisa.venta)}</p>
           )}

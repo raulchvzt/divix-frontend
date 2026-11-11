@@ -4,6 +4,8 @@ import { ArrowDownLeft, ArrowUpRight, ListChecks, Wallet, Clock, Sparkles } from
 import StatCard from '../components/ventanilla/StatCard'
 import OperacionRapida from '../components/ventanilla/OperacionRapida'
 import DivixAI from '../components/ventanilla/DivixAI'
+import AvisoMercado from '../components/ventanilla/AvisoMercado'
+import { obtenerUsuario } from '../api/auth'
 import { dinero } from '../utils/formato'
 import TablaTransacciones from '../components/ventanilla/TablaTransacciones'
 import { resumenDia, corteActivo } from '../api/operaciones'
@@ -47,6 +49,9 @@ export default function Ventanilla() {
           </button>
         </div>
       </div>
+
+      {/* Aviso si el mercado se movió desde la última actualización de precios */}
+      <AvisoMercado esAdministrador={obtenerUsuario()?.rol === 'administrador'} />
 
       {/* Tarjetas de resumen */}
       <div className="grid grid-cols-4 gap-5 mb-6">

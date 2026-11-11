@@ -30,3 +30,30 @@ export const guardarTipoCambio = (idMoneda, compra, venta) =>
     method: 'POST',
     body: { idMoneda, tipoCambioCompra: String(compra), tipoCambioVenta: String(venta) },
   })
+
+/**
+ * Precios del negocio comparados con la referencia del mercado (Banxico / BCE).
+ * Devuelve un objeto por código de divisa, o {} si la referencia no está disponible.
+ */
+export async function obtenerReferenciaMercado() {
+  try {
+    const r = await api('/referencia-mercado')
+    return Object.fromEntries(
+      (r.divisas ?? [])
+        .filter((d) => d.disponible)
+        .map((d) => [
+          d.codigo,
+          {
+            ...d,
+            referencia: Number(d.referencia),
+            compraVsMercadoPct: Number(d.compraVsMercadoPct),
+            ventaVsMercadoPct: Number(d.ventaVsMercadoPct),
+            movimientoPct: d.movimientoPct == null ? null : Number(d.movimientoPct),
+            umbralPct: r.umbralPct,
+          },
+        ]),
+    )
+  } catch {
+    return {} // sin referencia la app funciona igual
+  }
+}

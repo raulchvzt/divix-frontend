@@ -3,11 +3,12 @@ import { Pencil, Check, X, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { dinero } from '../../utils/formato'
 import InputNumero from '../InputNumero'
 import Bandera from '../Bandera'
+import ReferenciaMercado from './ReferenciaMercado'
 
 const inputPrecio =
   'w-full bg-white border border-line rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
 
-export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false }) {
+export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false, mercado }) {
   const [editando, setEditando] = useState(false)
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -23,6 +24,14 @@ export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false }
     setVenta(sinTasa ? '' : String(divisa.venta))
     setError('')
     setEditando(false)
+  }
+
+  // Carga la sugerencia en los campos; el dueño la revisa y decide si guarda.
+  const usarSugerencia = ({ compra: c, venta: v }) => {
+    setCompra(String(Number(c)))
+    setVenta(String(Number(v)))
+    setError('')
+    setEditando(true)
   }
 
   const guardar = async () => {
@@ -105,6 +114,11 @@ export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false }
           {sinTasa ? 'Sin tipo de cambio' : `${dinero(margen)} MXN · ${porcentaje.toFixed(2)}%`}
         </span>
       </div>
+
+      {/* Referencia del mercado */}
+      {!sinTasa && (
+        <ReferenciaMercado mercado={mercado} puedeEditar={puedeEditar && !editando} onUsarSugerencia={usarSugerencia} />
+      )}
 
       {/* Botones de edición */}
       {error && <p className="text-sm font-medium text-red-600 mt-3">{error}</p>}

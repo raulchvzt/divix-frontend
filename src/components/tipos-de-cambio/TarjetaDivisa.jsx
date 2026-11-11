@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Pencil, Check, X, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import { dinero } from '../../utils/formato'
 import InputNumero from '../InputNumero'
+import Bandera from '../Bandera'
 
 const inputPrecio =
   'w-full bg-white border border-line rounded-xl px-4 py-3 text-lg font-bold outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
@@ -46,15 +47,16 @@ export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false }
       {/* Encabezado */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-ink-800 text-white text-sm font-bold flex items-center justify-center">
-            {divisa.codigo}
-          </div>
+          <Bandera codigo={divisa.codigo} tamano="lg" />
           <div>
             <p className="font-bold">{divisa.nombre}</p>
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-700 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
-              Activa
-            </span>
+            <p className="flex items-center gap-2 text-xs font-semibold mt-0.5">
+              <span className="text-slate-400">{divisa.codigo}</span>
+              <span className="inline-flex items-center gap-1.5 text-brand-700">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-500" />
+                Activa
+              </span>
+            </p>
           </div>
         </div>
 

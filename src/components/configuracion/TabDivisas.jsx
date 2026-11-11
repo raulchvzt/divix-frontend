@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus, X, Check } from 'lucide-react'
 import { listarMonedas, crearMoneda, activarMoneda, desactivarMoneda } from '../../api/configuracion'
 import { useCarga } from '../../api/useCarga'
+import Bandera from '../Bandera'
 
 const campo =
   'w-full bg-white border border-line rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
@@ -172,9 +173,7 @@ export default function TabDivisas() {
           <tr className="border-b border-line bg-slate-50/50">
             <td className="px-6 py-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-600 text-white text-xs font-bold flex items-center justify-center">
-                  MXN
-                </div>
+                <Bandera codigo="MXN" tamano="md" />
                 <div>
                   <p className="font-semibold">Peso mexicano</p>
                   <p className="text-xs text-slate-400 mt-0.5">Moneda nacional</p>
@@ -194,10 +193,11 @@ export default function TabDivisas() {
             <tr key={d.codigo} className="border-b border-line last:border-0 hover:bg-slate-50/60 transition-colors">
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-ink-800 text-white text-xs font-bold flex items-center justify-center">
-                    {d.codigo}
+                  <Bandera codigo={d.codigo} tamano="md" />
+                  <div>
+                    <p className="font-semibold">{d.nombre}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">{d.codigo}</p>
                   </div>
-                  <p className="font-semibold">{d.nombre}</p>
                 </div>
               </td>
               <td className="px-6 py-4">

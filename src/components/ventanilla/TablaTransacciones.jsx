@@ -3,6 +3,7 @@ import { Search, MoreHorizontal, Clock, ArrowUpRight, ArrowDownLeft } from 'luci
 import { listarOperaciones } from '../../api/operaciones'
 import { useCarga } from '../../api/useCarga'
 import { dinero } from '../../utils/formato'
+import Bandera from '../Bandera'
 
 function Etiqueta({ tipo }) {
   const esVenta = tipo === 'venta'
@@ -81,7 +82,12 @@ export default function TablaTransacciones({ version = 0 }) {
               <td className="px-6 py-5">
                 <Etiqueta tipo={t.tipo} />
               </td>
-              <td className="px-6 py-5 font-bold">{t.divisa}</td>
+              <td className="px-6 py-5 font-bold">
+                  <span className="inline-flex items-center gap-2">
+                    <Bandera codigo={t.divisa} />
+                    {t.divisa}
+                  </span>
+                </td>
               <td className="px-6 py-5 text-slate-600">{t.monto.toFixed(2)}</td>
               <td className="px-6 py-5 text-slate-600">{dinero(t.tasa)}</td>
               <td className="px-6 py-5 font-bold">{dinero(t.total)}</td>

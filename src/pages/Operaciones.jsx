@@ -3,6 +3,7 @@ import { Search, ArrowUpRight, ArrowDownLeft, ChevronLeft, ChevronRight, X } fro
 import { listarOperaciones } from '../api/operaciones'
 import { useCarga } from '../api/useCarga'
 import { dinero } from '../utils/formato'
+import Bandera from '../components/Bandera'
 
 const POR_PAGINA = 6
 
@@ -163,7 +164,12 @@ export default function Operaciones() {
                 <td className="px-6 py-4">
                   <Etiqueta tipo={o.tipo} />
                 </td>
-                <td className="px-6 py-4 font-bold">{o.divisa}</td>
+                <td className="px-6 py-4 font-bold">
+                  <span className="inline-flex items-center gap-2">
+                    <Bandera codigo={o.divisa} />
+                    {o.divisa}
+                  </span>
+                </td>
                 <td className="px-6 py-4 text-slate-600">{o.monto.toFixed(2)}</td>
                 <td className="px-6 py-4 text-slate-600">{dinero(o.tasa)}</td>
                 <td className="px-6 py-4 font-bold">{dinero(o.total)}</td>

@@ -90,8 +90,8 @@ export default function Ticket({ operacion, onCerrar }) {
   }, [onCerrar])
 
   return createPortal(
-    <div className="zona-ticket fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4">
-      <div className="ticket-modal bg-white rounded-2xl shadow-2xl max-h-full flex flex-col overflow-hidden">
+    <div className="zona-ticket animar-fondo fixed inset-0 z-50 flex items-center justify-center bg-ink-900/60 p-4">
+      <div className="ticket-modal animar-modal bg-white rounded-2xl shadow-2xl max-h-full flex flex-col overflow-hidden">
         <div className="ticket-controles flex items-center gap-3 px-6 py-4 border-b border-line">
           <CheckCircle2 size={22} className="text-brand-600" />
           <div>

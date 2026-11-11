@@ -84,3 +84,170 @@ button:disabled { cursor: wait; }
     print-color-adjust: exact;
   }
 }
+
+/* ───────────────────────── Animaciones ─────────────────────────
+   Transiciones suaves para que la app no se sienta "tiesa":
+   - cada página entra con un desvanecido y sus secciones en cascada
+   - las tarjetas que aparecen después (pestañas, formularios, datos
+     que terminan de cargar) se desvanecen al aparecer
+   - modales, panel de IA, mensajes del chat y filas de tablas
+   Las animaciones de CSS solo corren cuando un elemento aparece, no
+   cuando React lo vuelve a pintar, así que no se repiten de más. */
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes desvanecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes modal-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes panel-entrar {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes puntos {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+:root {
+  --curva-suave: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer base {
+  /* Cambios de color, borde y sombra suaves en todo lo que se puede tocar. */
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: 180ms;
+    transition-timing-function: ease-out;
+  }
+  /* Pequeño "hundido" al presionar un botón. */
+  button:not(:disabled):active {
+    transform: scale(0.98);
+  }
+}
+
+/* Página: entra completa y sus secciones aparecen una tras otra. */
+.pagina > * > * {
+  animation: aparecer 420ms var(--curva-suave) both;
+}
+.pagina > * > :nth-child(2) {
+  animation-delay: 60ms;
+}
+.pagina > * > :nth-child(3) {
+  animation-delay: 120ms;
+}
+.pagina > * > :nth-child(4) {
+  animation-delay: 180ms;
+}
+.pagina > * > :nth-child(n + 5) {
+  animation-delay: 240ms;
+}
+
+/* Tarjetas que aparecen después (al cambiar de pestaña, abrir un formulario
+   o terminar de cargar datos). */
+.pagina .rounded-2xl {
+  animation: desvanecer 320ms ease-out both;
+}
+/* Tarjetas en fila (indicadores, tipos de cambio…): en cascada. */
+.pagina .grid > .rounded-2xl:nth-child(2) {
+  animation-delay: 50ms;
+}
+.pagina .grid > .rounded-2xl:nth-child(3) {
+  animation-delay: 100ms;
+}
+.pagina .grid > .rounded-2xl:nth-child(4) {
+  animation-delay: 150ms;
+}
+.pagina .grid > .rounded-2xl:nth-child(n + 5) {
+  animation-delay: 200ms;
+}
+
+/* Filas de tablas (al cambiar de página o filtrar). */
+.pagina tbody tr {
+  animation: desvanecer 260ms ease-out both;
+}
+
+/* Modal (ticket). */
+.animar-fondo {
+  animation: desvanecer 200ms ease-out both;
+}
+.animar-modal {
+  animation: modal-entrar 320ms var(--curva-suave) both;
+}
+
+/* Panel del asistente y sus mensajes. */
+.pagina .animar-panel {
+  animation: panel-entrar 380ms var(--curva-suave) both;
+}
+.animar-mensaje {
+  animation: aparecer 300ms var(--curva-suave) both;
+}
+.puntos-cargando span {
+  animation: puntos 1.2s infinite both;
+}
+.puntos-cargando span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.puntos-cargando span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Quien tenga activado "reducir movimiento" en su sistema no ve animaciones. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  * {
+    animation: none !important;
+  }
+}

@@ -25,6 +25,7 @@ import {
   porCajero,
   porHoraDelDia,
 } from '../utils/estadisticas'
+import Bandera from '../components/Bandera'
 
 // Compra/venta usan los mismos colores que las etiquetas de la tabla de Operaciones.
 const COLOR = {
@@ -290,6 +291,11 @@ export default function Estadisticas() {
                     {divisas.map((d, i) => (
                       <li key={d.divisa} className="flex items-center gap-3">
                         <Muestra color={colorDivisa(d, i)} />
+                        {d.divisa === 'Otras' ? (
+                          <span className="w-5 shrink-0" />
+                        ) : (
+                          <Bandera codigo={d.divisa} />
+                        )}
                         <span className="font-semibold w-12">{d.divisa}</span>
                         <span className="text-slate-400">{d.pct.toFixed(1)}%</span>
                         <span className="ml-auto font-semibold">{dinero(d.total)}</span>

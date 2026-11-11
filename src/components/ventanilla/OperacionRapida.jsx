@@ -5,6 +5,7 @@ import { registrarOperacion, obtenerClienteGeneral } from '../../api/operaciones
 import { useCarga } from '../../api/useCarga'
 import { dinero } from '../../utils/formato'
 import InputNumero from '../InputNumero'
+import Bandera from '../Bandera'
 
 const campo =
   'w-full bg-white border border-line rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
@@ -76,19 +77,23 @@ export default function OperacionRapida({ onRegistrada }) {
       <div className="grid grid-cols-2 gap-x-5 gap-y-5">
         <div>
           <label className="block text-sm font-semibold mb-2">Divisa</label>
-          <select value={divisa?.codigo ?? ''} onChange={(e) => setCodigo(e.target.value)} className={campo}>
+          <div className="relative">
+            {divisa && <Bandera codigo={divisa.codigo} className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />}
+            <select value={divisa?.codigo ?? ''} onChange={(e) => setCodigo(e.target.value)} className={`${campo} pl-11!`}>
             {(divisas ?? []).map((d) => (
               <option key={d.codigo} value={d.codigo}>
                 {d.codigo} · {d.nombre}
               </option>
             ))}
-          </select>
+            </select>
+          </div>
         </div>
 
         <div>
           <label className="block text-sm font-semibold mb-2">Monto en divisa</label>
           <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-medium text-slate-400">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2 text-sm font-medium text-slate-400">
+              {divisa && <Bandera codigo={divisa.codigo} />}
               {divisa?.codigo}
             </span>
             <InputNumero

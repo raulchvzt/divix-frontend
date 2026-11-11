@@ -6,6 +6,8 @@ import { useCarga } from '../../api/useCarga'
 import { dinero } from '../../utils/formato'
 import InputNumero from '../InputNumero'
 import Bandera from '../Bandera'
+import Ticket from './Ticket'
+import { obtenerUsuario } from '../../api/auth'
 
 const campo =
   'w-full bg-white border border-line rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
@@ -17,6 +19,7 @@ export default function OperacionRapida({ onRegistrada }) {
   const [error, setError] = useState('')
   const [aviso, setAviso] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [ticket, setTicket] = useState(null)
   const { datos: divisas, error: errorDivisas } = useCarga(obtenerDivisas)
 
   const divisa = divisas?.find((d) => d.codigo === codigo) ?? divisas?.[0]
@@ -31,8 +34,21 @@ export default function OperacionRapida({ onRegistrada }) {
     setEnviando(true)
     try {
       const cliente = await obtenerClienteGeneral()
-      await registrarOperacion({ idCliente: cliente.id, idMoneda: divisa.id, tipo, monto })
+      const op = await registrarOperacion({ idCliente: cliente.id, idMoneda: divisa.id, tipo, monto })
       setAviso(`Operación registrada: ${tipo} de ${monto} ${divisa.codigo}`)
+      // Los importes salen de la respuesta del servidor, que es quien calcula el tipo de cambio.
+      setTicket({
+        folio: op.id,
+        fecha: op.fechaHora ? new Date(op.fechaHora) : new Date(),
+        tipo: op.tipoOperacion ?? tipo,
+        codigo: divisa.codigo,
+        nombreDivisa: divisa.nombre,
+        cantidad: Number(op.cantidadDivisa ?? monto),
+        tasa: Number(op.tipoCambioAplicado ?? tasa),
+        total: Number(op.importeTotal ?? total),
+        cajero: obtenerUsuario()?.nombre ?? '—',
+        cliente: `${cliente.nombre} ${cliente.apellidoPaterno ?? ''}`.trim(),
+      })
       setMonto('')
       onRegistrada?.()
     } catch (e) {
@@ -135,6 +151,7 @@ export default function OperacionRapida({ onRegistrada }) {
           {enviando ? 'Registrando…' : 'Registrar operación'}
         </button>
       </div>
+      {ticket && <Ticket operacion={ticket} onCerrar={() => setTicket(null)} />}
     </div>
   )
 }

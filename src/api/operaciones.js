@@ -63,3 +63,6 @@ export const consultarAsistente = (pregunta, idConversacion) =>
 
 export const listarConversaciones = () => api('/asistente-ia/conversaciones')
 export const obtenerConversacion = (id) => api(`/asistente-ia/conversaciones/${encodeURIComponent(id)}`)
+
+/** Demanda esperada de cada divisa en los próximos meses (todo el negocio). */
+export const obtenerPronosticoDemanda = () => api('/pronostico-demanda')

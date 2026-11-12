@@ -7,10 +7,13 @@ import {
 } from '../../api/operaciones'
 import { obtenerUsuario } from '../../api/auth'
 
+// Preguntas que las tarjetas y Estadísticas no contestan directo: comparar,
+// resumir y explicar. Todas se responden con los datos que hoy recibe el
+// asistente (últimos 7 días por divisa, tipos de cambio y la caja abierta).
 const sugerencias = [
-  '¿Cuántos dólares vendimos hoy?',
-  '¿Cuánto efectivo debo tener en caja?',
-  '¿Cómo van las ventas de esta semana?',
+  'Compara hoy contra ayer: ¿vendimos más o menos?',
+  'Resúmeme la semana en 3 puntos',
+  '¿Cuánto debo tener de cada divisa en mi caja?',
 ]
 
 const CLAVE_CONVERSACION = 'divix_conversacion'

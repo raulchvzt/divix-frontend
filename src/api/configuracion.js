@@ -13,7 +13,7 @@ export const desactivarUsuario = (id) => api(`/usuarios/${id}/desactivar`, { met
 
 // ---- Divisas (monedas) ----
 export const listarMonedas = () => api('/monedas')
-export const crearMoneda = (codigo, nombre) =>
-  api('/monedas', { method: 'POST', body: { codigo, nombre } })
+export const crearMoneda = (codigo, nombre, simbolo) =>
+  api('/monedas', { method: 'POST', body: { codigo, nombre, ...(simbolo ? { simbolo } : {}) } })
 export const activarMoneda = (id) => api(`/monedas/${id}/activar`, { method: 'PATCH' })
 export const desactivarMoneda = (id) => api(`/monedas/${id}/desactivar`, { method: 'PATCH' })

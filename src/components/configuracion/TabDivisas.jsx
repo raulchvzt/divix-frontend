@@ -3,6 +3,7 @@ import { Plus, X, Check } from 'lucide-react'
 import { listarMonedas, crearMoneda, activarMoneda, desactivarMoneda } from '../../api/configuracion'
 import { useCarga } from '../../api/useCarga'
 import Bandera from '../Bandera'
+import { buscarDivisas, divisaPorCodigo } from '../../utils/divisasMundo'
 
 const campo =
   'w-full bg-white border border-line rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
@@ -34,10 +35,46 @@ export default function TabDivisas() {
   const [nueva, setNueva] = useState(vacio)
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
+  // Sugerencias del catálogo mundial mientras se escribe el código o el nombre.
+  const [busqueda, setBusqueda] = useState({ texto: '', porNombre: false })
+  const [resaltada, setResaltada] = useState(0)
+  const sugerencias = buscarDivisas(busqueda.texto, { porNombre: busqueda.porNombre })
+  const yaExiste = (codigo) => codigo === 'MXN' || divisas.some((d) => d.codigo === codigo)
+
+  const escribir = (campo, valor) => {
+    setNueva({ ...nueva, [campo]: valor })
+    setBusqueda({ texto: valor, porNombre: campo === 'nombre' })
+    setResaltada(0)
+  }
+
+  const elegir = (d) => {
+    if (yaExiste(d.codigo)) return
+    setNueva({ codigo: d.codigo, nombre: d.nombre })
+    setBusqueda({ texto: '', porNombre: false })
+    setError('')
+  }
+
+  // Flechas para moverse, Enter para elegir y Esc para cerrar las sugerencias.
+  const teclas = (e) => {
+    if (!sugerencias.length) return
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setResaltada((i) => (i + 1) % sugerencias.length)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setResaltada((i) => (i - 1 + sugerencias.length) % sugerencias.length)
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      elegir(sugerencias[resaltada])
+    } else if (e.key === 'Escape') {
+      setBusqueda({ texto: '', porNombre: false })
+    }
+  }
 
   const cerrarForm = () => {
     setMostrarForm(false)
     setNueva(vacio)
+    setBusqueda({ texto: '', porNombre: false })
     setError('')
   }
 
@@ -53,7 +90,7 @@ export default function TabDivisas() {
     setError('')
     setGuardando(true)
     try {
-      await crearMoneda(codigo, nombre)
+      await crearMoneda(codigo, nombre, divisaPorCodigo(codigo)?.simbolo)
       cerrarForm()
       setVersion((v) => v + 1)
     } catch (e) {
@@ -109,13 +146,20 @@ export default function TabDivisas() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-4">
+          <div className="relative grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-4">
             <div>
               <label className="block text-sm font-semibold mb-2">Código</label>
               <input
                 value={nueva.codigo}
-                onChange={(e) => setNueva({ ...nueva, codigo: e.target.value.toUpperCase() })}
+                onChange={(e) => escribir('codigo', e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
+                onKeyDown={teclas}
+                onBlur={() => setBusqueda({ texto: '', porNombre: false })}
                 maxLength={3}
+                autoFocus
+                autoComplete="off"
+                role="combobox"
+                aria-expanded={sugerencias.length > 0}
+                aria-controls="sugerencias-divisas"
                 placeholder="GBP"
                 className={`${campo} uppercase tracking-widest`}
               />
@@ -124,12 +168,63 @@ export default function TabDivisas() {
               <label className="block text-sm font-semibold mb-2">Nombre</label>
               <input
                 value={nueva.nombre}
-                onChange={(e) => setNueva({ ...nueva, nombre: e.target.value })}
+                onChange={(e) => escribir('nombre', e.target.value)}
+                onKeyDown={teclas}
+                onBlur={() => setBusqueda({ texto: '', porNombre: false })}
+                autoComplete="off"
+                role="combobox"
+                aria-expanded={sugerencias.length > 0}
+                aria-controls="sugerencias-divisas"
                 placeholder="Libra esterlina"
                 className={campo}
               />
             </div>
+
+            {/* Sugerencias */}
+            {sugerencias.length > 0 && (
+              <ul
+                id="sugerencias-divisas"
+                role="listbox"
+                className="animar-modal absolute left-0 right-0 top-full mt-2 z-20 bg-white border border-line rounded-xl shadow-xl py-1.5 max-h-80 overflow-y-auto"
+              >
+                {sugerencias.map((d, i) => {
+                  const existe = yaExiste(d.codigo)
+                  return (
+                    <li
+                      key={d.codigo}
+                      role="option"
+                      aria-selected={i === resaltada}
+                      aria-disabled={existe}
+                      // mousedown para que el clic llegue antes de que el campo pierda el foco
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        elegir(d)
+                      }}
+                      onMouseEnter={() => setResaltada(i)}
+                      className={`flex items-center gap-3 px-4 py-2.5 text-sm ${
+                        existe
+                          ? 'opacity-50 cursor-not-allowed'
+                          : `cursor-pointer ${i === resaltada ? 'bg-brand-50' : ''}`
+                      }`}
+                    >
+                      <Bandera codigo={d.codigo} />
+                      <span className="font-bold w-12">{d.codigo}</span>
+                      <span className="text-slate-600 truncate">{d.nombre}</span>
+                      <span className="ml-auto pl-3 shrink-0 text-xs text-slate-400">
+                        {existe ? 'Ya agregada' : d.simbolo}
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
           </div>
+
+          {nueva.codigo.length === 3 && !divisaPorCodigo(nueva.codigo) && (
+            <p className="text-xs text-amber-700 mt-3">
+              {nueva.codigo} no es un código de divisa reconocido. Revisa que esté bien escrito.
+            </p>
+          )}
 
           {error && <p className="text-sm font-medium text-red-600 mt-3">{error}</p>}
 

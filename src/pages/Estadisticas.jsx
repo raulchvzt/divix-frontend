@@ -26,6 +26,7 @@ import {
   porHoraDelDia,
 } from '../utils/estadisticas'
 import Bandera from '../components/Bandera'
+import PronosticoDemanda from '../components/estadisticas/PronosticoDemanda'
 
 // Compra/venta usan los mismos colores que las etiquetas de la tabla de Operaciones.
 const COLOR = {
@@ -355,6 +356,9 @@ export default function Estadisticas() {
               </div>
             </Tarjeta>
           </div>
+
+          {/* Pronóstico de los próximos meses (no depende del filtro de periodo) */}
+          <PronosticoDemanda />
         </>
       )}
     </div>

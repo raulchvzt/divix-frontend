@@ -58,7 +58,7 @@ export default function Ventanilla() {
 
       {/* Operación rápida (a la derecha irá el panel de Divix AI) */}
            {/* Operación rápida + panel de IA */}
-      <OperacionRapida onRegistrada={recargar} />
+      <OperacionRapida onRegistrada={recargar} billetesCaja={corte?.billetes ?? null} />
 
       {/* Últimas transacciones */}
       <div className="mt-6">

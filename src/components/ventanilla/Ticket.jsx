@@ -4,6 +4,7 @@ import { Printer, X, CheckCircle2 } from 'lucide-react'
 import { obtenerNegocio } from '../../api/configuracion'
 import { useCarga } from '../../api/useCarga'
 import { dinero } from '../../utils/formato'
+import { describirBilletes } from '../../utils/billetes'
 
 /**
  * Ticket de una operación recién registrada, con botón para imprimirlo.
@@ -63,6 +64,11 @@ function Papel({ operacion: o, negocio }) {
 
       <Fila etiqueta="Cantidad" valor={`${numero(o.cantidad)} ${o.codigo}`} />
       <Fila etiqueta="Tipo de cambio" valor={`$${numero(o.tasa, decimalesTasa)}`} />
+      {o.billetes && describirBilletes(o.billetes) && (
+        <p className="mt-1 text-[11px]">
+          Billetes {o.tipo === 'compra' ? 'recibidos' : 'entregados'}: {describirBilletes(o.billetes)}
+        </p>
+      )}
       <Separador />
       <div className="text-[14px]">
         <Fila

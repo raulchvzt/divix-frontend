@@ -29,10 +29,11 @@ export async function resumenDia() {
 }
 
 /** El servidor calcula tipo de cambio e importe; aquí solo se manda lo que captura el cajero. */
-export const registrarOperacion = ({ idCliente, idMoneda, tipo, monto }) =>
+export const registrarOperacion = ({ idCliente, idMoneda, tipo, monto, billetes }) =>
   api('/operaciones', {
     method: 'POST',
-    body: { idCliente, idMoneda, tipoOperacion: tipo, cantidadDivisa: String(monto) },
+    // billetes: solo USD, { "100": 4, "50": 2 } (qué billetes entraron o salieron)
+    body: { idCliente, idMoneda, tipoOperacion: tipo, cantidadDivisa: String(monto), ...(billetes ? { billetes } : {}) },
   })
 
 /** Corte abierto del usuario, o null si no hay (o su rol no tiene caja). */

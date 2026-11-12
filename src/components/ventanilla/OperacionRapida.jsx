@@ -8,11 +8,14 @@ import InputNumero from '../InputNumero'
 import Bandera from '../Bandera'
 import Ticket from './Ticket'
 import { obtenerUsuario } from '../../api/auth'
+import SelectorBilletes from '../SelectorBilletes'
+import { billetesVacios, billetesValidos } from '../../utils/billetes'
 
 const campo =
   'w-full bg-white border border-line rounded-xl px-4 py-3.5 text-sm font-medium outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition'
 
-export default function OperacionRapida({ onRegistrada }) {
+/** billetesCaja: inventario de billetes de USD de la caja abierta ({ esperados, completo }) o null. */
+export default function OperacionRapida({ onRegistrada, billetesCaja }) {
   const [tipo, setTipo] = useState('venta') // 'compra' | 'venta'
   const [codigo, setCodigo] = useState('')
   const [monto, setMonto] = useState('')
@@ -20,21 +23,36 @@ export default function OperacionRapida({ onRegistrada }) {
   const [aviso, setAviso] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [ticket, setTicket] = useState(null)
+  const [billetes, setBilletes] = useState(billetesVacios)
   const { datos: divisas, error: errorDivisas } = useCarga(obtenerDivisas)
 
   const divisa = divisas?.find((d) => d.codigo === codigo) ?? divisas?.[0]
   const tasa = divisa ? (tipo === 'venta' ? divisa.venta : divisa.compra) : 0
   const total = Math.round((parseFloat(monto) || 0) * tasa * 100) / 100
 
+  // Dólares: se indica qué billetes se entregan (venta) o se reciben (compra).
+  const esUsd = divisa?.codigo === 'USD'
+  const modoBilletes = tipo === 'venta' ? 'entregar' : 'recibir'
+  const disponibles = billetesCaja?.completo ? billetesCaja.esperados : null
+
   const registrar = async () => {
     setError('')
     setAviso('')
     if (!divisa) return setError('No hay divisas disponibles.')
     if (!(parseFloat(monto) > 0)) return setError('Escribe un monto mayor a cero.')
+    if (esUsd && !billetesValidos(monto, modoBilletes, disponibles, billetes)) {
+      return setError('Revisa los billetes: deben sumar el monto y no puedes entregar más de los que hay en caja.')
+    }
     setEnviando(true)
     try {
       const cliente = await obtenerClienteGeneral()
-      const op = await registrarOperacion({ idCliente: cliente.id, idMoneda: divisa.id, tipo, monto })
+      const op = await registrarOperacion({
+        idCliente: cliente.id,
+        idMoneda: divisa.id,
+        tipo,
+        monto,
+        billetes: esUsd ? billetes : undefined,
+      })
       setAviso(`Operación registrada: ${tipo} de ${monto} ${divisa.codigo}`)
       // Los importes salen de la respuesta del servidor, que es quien calcula el tipo de cambio.
       setTicket({
@@ -48,6 +66,7 @@ export default function OperacionRapida({ onRegistrada }) {
         total: Number(op.importeTotal ?? total),
         cajero: obtenerUsuario()?.nombre ?? '—',
         cliente: `${cliente.nombre} ${cliente.apellidoPaterno ?? ''}`.trim(),
+        billetes: op.billetes ?? null,
       })
       setMonto('')
       onRegistrada?.()
@@ -113,7 +132,8 @@ export default function OperacionRapida({ onRegistrada }) {
               {divisa?.codigo}
             </span>
             <InputNumero
-              placeholder="0.00"
+              decimales={esUsd ? 0 : 2}
+              placeholder={esUsd ? '0' : '0.00'}
               value={monto}
               onChange={(e) => setMonto(e.target.value)}
               className={`${campo} text-right text-base font-semibold`}
@@ -129,6 +149,18 @@ export default function OperacionRapida({ onRegistrada }) {
             <span className="font-semibold">{dinero(tasa)} MXN</span>
           </div>
         </div>
+
+        {esUsd && parseFloat(monto) > 0 && (
+          <div className="sm:col-span-2">
+            <SelectorBilletes
+              monto={monto}
+              modo={modoBilletes}
+              disponibles={disponibles}
+              value={billetes}
+              onChange={setBilletes}
+            />
+          </div>
+        )}
       </div>
 
       {(error || errorDivisas) && <p className="text-sm font-medium text-red-600 mt-4">{error || errorDivisas}</p>}

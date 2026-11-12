@@ -19,7 +19,9 @@ const num = (valor) => Number(valor ?? 0)
 const importe = (valor) => Math.round(Number(valor) * 100) / 100
 const fechaCorta = (f) => new Date(f).toLocaleDateString('es-MX')
 const hora = (f) => new Date(f).toLocaleTimeString('es-MX')
-const totalUSD = (cantidades) => denominaciones.reduce((total, valor) => total + valor * Number(cantidades[valor] || 0), 0)
+// En el conteo de dólares se captura el IMPORTE de cada denominación y se calcula cuántos billetes son.
+const totalUSD = (importes) => denominaciones.reduce((total, valor) => total + Number(importes[valor] || 0), 0)
+const cuantosBilletes = (valor, importe) => (importe === '' ? null : Number(importe) / valor)
 const etiquetaMovimiento = { entrada: 'entrada', salida: 'salida', reposicion: 'reposición' }
 
 const inputClase = 'w-full rounded-lg border border-line bg-white px-3 py-2 text-sm'
@@ -153,13 +155,22 @@ export default function Caja() {
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead><tr className="text-left text-slate-500"><th className="py-2">Billete USD</th><th>Cantidad de billetes</th><th className="text-right">Importe USD</th></tr></thead>
-          <tbody>{denominaciones.map((valor) => <tr key={valor} className="border-t border-line">
-            <td className="py-3">{dinero(valor)}</td>
-            <td><InputNumero aria-label={`Cantidad de billetes de ${valor} dólares`} decimales={0} required className={`${inputClase} max-w-32`} value={billetes[valor]} onChange={(event) => setBilletes({ ...billetes, [valor]: event.target.value })} /></td>
-            <td className="text-right font-medium">{dinero(valor * Number(billetes[valor] || 0))}</td>
-          </tr>)}</tbody>
-          <tfoot><tr className="border-t border-line font-bold"><td colSpan="2" className="py-3">Total USD</td><td className="text-right">{dinero(totalUSD(billetes))}</td></tr></tfoot>
+          <thead><tr className="text-left text-slate-500"><th className="py-2">Billete USD</th><th>Importe USD</th><th className="text-right">Cantidad de billetes</th></tr></thead>
+          <tbody>{denominaciones.map((valor) => {
+            const cantidad = cuantosBilletes(valor, billetes[valor])
+            const noCuadra = cantidad !== null && !Number.isInteger(cantidad)
+            return <tr key={valor} className="border-t border-line">
+              <td className="py-3">{dinero(valor)}</td>
+              <td className="py-2">
+                <InputNumero aria-label={`Importe en billetes de ${valor} dólares`} decimales={0} multiploDe={valor} required placeholder="0" className={`${inputClase} max-w-40 ${noCuadra ? 'border-red-400 focus:border-red-500 focus:ring-red-500/20' : ''}`} value={billetes[valor]} onChange={(event) => setBilletes({ ...billetes, [valor]: event.target.value })} />
+                {noCuadra && <p className="text-xs font-medium text-red-600 mt-1">Debe ser múltiplo de {dinero(valor)}</p>}
+              </td>
+              <td className={`text-right font-medium ${noCuadra ? 'text-red-600' : ''}`}>
+                {cantidad === null ? '—' : noCuadra ? 'No cuadra' : `${cantidad.toLocaleString('en-US')} ${cantidad === 1 ? 'billete' : 'billetes'}`}
+              </td>
+            </tr>
+          })}</tbody>
+          <tfoot><tr className="border-t border-line font-bold"><td className="py-3">Total USD</td><td>{dinero(totalUSD(billetes))}</td><td className="text-right">{denominaciones.reduce((t, valor) => t + Math.floor(cuantosBilletes(valor, billetes[valor]) ?? 0), 0).toLocaleString('en-US')} billetes</td></tr></tfoot>
         </table>
       </div>
     )

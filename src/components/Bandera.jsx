@@ -3,11 +3,13 @@
 // proyecto, así que no dependen de internet. Si una divisa no tiene bandera
 // aquí, se muestra su código como antes.
 
-// Solo se incluyen las banderas de las divisas más comunes.
-const archivos = import.meta.glob(
-  '/node_modules/flag-icons/flags/1x1/{mx,us,eu,ca,gb,jp,ch,au,nz,cn,hk,kr,in,br,ar,cl,co,pe,uy,gt,cr,do,se,no,dk,pl,cz,hu,tr,za,sg,th,il,ru}.svg',
-  { eager: true, query: '?url', import: 'default' },
-)
+// Se incluyen todas las banderas; cada una es un archivo aparte que el
+// navegador solo descarga cuando se muestra.
+const archivos = import.meta.glob('/node_modules/flag-icons/flags/1x1/*.svg', {
+  eager: true,
+  query: '?no-inline',
+  import: 'default',
+})
 const banderas = Object.fromEntries(
   Object.entries(archivos).map(([ruta, url]) => [ruta.match(/(\w+)\.svg$/)[1], url]),
 )

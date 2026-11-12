@@ -1,4 +1,4 @@
-import { api, guardarToken, borrarToken } from './client'
+import { api, guardarToken, guardarRefresco, borrarToken } from './client'
 
 const CLAVE_USUARIO = 'divix_usuario'
 
@@ -22,6 +22,7 @@ export async function iniciarSesion(usuario, contrasena) {
     auth: false,
   })
   guardarToken(respuesta.accessToken)
+  if (respuesta.refreshToken) guardarRefresco(respuesta.refreshToken)
   localStorage.setItem(CLAVE_USUARIO, JSON.stringify(respuesta.usuario))
   return respuesta.usuario
 }

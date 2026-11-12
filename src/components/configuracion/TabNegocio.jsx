@@ -73,7 +73,7 @@ function Formulario({ inicial }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-5 gap-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-5">
         <Campo label="Nombre del negocio">
           <input value={datos.nombre} onChange={cambiar('nombre')} className={campo} disabled={!puedeEditar} />
         </Campo>
@@ -90,7 +90,7 @@ function Formulario({ inicial }) {
           <input type="email" value={datos.correo} onChange={cambiar('correo')} className={campo} disabled={!puedeEditar} />
         </Campo>
 
-        <div className="col-span-2">
+        <div className="sm:col-span-2">
           <Campo label="Dirección">
             <input value={datos.direccion} onChange={cambiar('direccion')} className={campo} disabled={!puedeEditar} />
           </Campo>

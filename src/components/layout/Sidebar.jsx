@@ -9,6 +9,8 @@ import {
   SlidersHorizontal,
   ShieldCheck,
   PieChart,
+  X,
+  Sparkles,
 } from 'lucide-react'
 
 const operacion = [
@@ -23,7 +25,7 @@ const administracion = [
   { to: '/configuracion', label: 'Configuración', icon: SlidersHorizontal },
 ]
 
-function NavSection({ title, items }) {
+function NavSection({ title, items, onNavegar }) {
   const visibles = items.filter((i) => puedeVer(i.to))
   if (visibles.length === 0) return null
   return (
@@ -37,6 +39,7 @@ function NavSection({ title, items }) {
             key={to}
             to={to}
             end={to === '/'}
+            onClick={onNavegar}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors ${
                 isActive
@@ -54,9 +57,22 @@ function NavSection({ title, items }) {
   )
 }
 
-export default function Sidebar() {
+export default function Sidebar({ abierto = false, onCerrar = () => {}, iaAbierta = false, onIA = () => {} }) {
   return (
-    <aside className="w-[244px] shrink-0 bg-white border-r border-line h-screen sticky top-0 flex flex-col px-4 py-6">
+    <>
+    {/* Fondo oscuro detrás del menú (solo móvil/tablet) */}
+    <div
+      onClick={onCerrar}
+      className={`fixed inset-0 z-30 bg-ink-900/50 transition-opacity lg:hidden ${abierto ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
+    />
+    <aside
+      className={`fixed inset-y-0 left-0 z-40 w-[260px] lg:w-[244px] shrink-0 bg-white border-r border-line h-screen overflow-y-auto flex flex-col px-4 py-6 transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:translate-x-0 ${
+        abierto ? 'translate-x-0' : '-translate-x-full'
+      }`}
+    >
+      <button onClick={onCerrar} title="Cerrar menú" className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 lg:hidden">
+        <X size={22} />
+      </button>
       {/* Logo */}
       <div className="flex items-center gap-3 px-2 mb-10">
         <div className="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-md shadow-brand-600/30">
@@ -72,8 +88,25 @@ export default function Sidebar() {
         </div>
       </div>
 
-      <NavSection title="Operación" items={operacion} />
-      <NavSection title="Administración" items={administracion} />
+      <NavSection title="Operación" items={operacion} onNavegar={onCerrar} />
+      <NavSection title="Administración" items={administracion} onNavegar={onCerrar} />
+
+      {/* Asistente de IA */}
+      <div className="mb-6">
+        <p className="px-3 mb-3 text-[11px] font-semibold tracking-[0.15em] text-slate-400 uppercase">Asistente</p>
+        <button
+          onClick={() => {
+            onIA()
+            onCerrar()
+          }}
+          className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors ${
+            iaAbierta ? 'bg-ink-800 text-white' : 'text-slate-600 hover:bg-slate-50'
+          }`}
+        >
+          <Sparkles size={20} strokeWidth={1.8} className={iaAbierta ? 'text-brand-500' : ''} />
+          Divix AI
+        </button>
+      </div>
 
       {/* Tarjeta inferior */}
       <div className="mt-auto rounded-2xl bg-ink-800 text-white p-4">
@@ -89,5 +122,6 @@ export default function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   )
 }

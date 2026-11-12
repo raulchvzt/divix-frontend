@@ -109,7 +109,7 @@ export default function TabDivisas() {
             </button>
           </div>
 
-          <div className="grid grid-cols-[160px_1fr] gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-[160px_1fr] gap-4">
             <div>
               <label className="block text-sm font-semibold mb-2">Código</label>
               <input
@@ -153,7 +153,8 @@ export default function TabDivisas() {
       )}
 
       {/* Tabla */}
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[620px] text-sm">
         <thead>
           <tr className="bg-slate-50 border-y border-line">
             {['Divisa', 'Estado', 'Activa'].map((c, i) => (
@@ -219,6 +220,7 @@ export default function TabDivisas() {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

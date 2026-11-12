@@ -174,7 +174,7 @@ export default function Estadisticas() {
           <p className="text-sm text-slate-500">
             Operación / <span className="text-brand-600 font-medium">Estadísticas</span>
           </p>
-          <h1 className="text-[32px] font-bold tracking-tight mt-2">Estadísticas</h1>
+          <h1 className="text-2xl sm:text-[32px] font-bold tracking-tight mt-2">Estadísticas</h1>
           <p className="text-sm text-slate-500 mt-1">Los indicadores más importantes de tus operaciones.</p>
         </div>
 

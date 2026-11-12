@@ -130,7 +130,7 @@ export default function TabUsuarios() {
             </button>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-semibold mb-2">Nombre completo</label>
               <input
@@ -184,7 +184,8 @@ export default function TabUsuarios() {
       )}
 
       {/* Tabla */}
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[620px] text-sm">
         <thead>
           <tr className="bg-slate-50 border-y border-line">
             {['Usuario', 'Rol', 'Estado', ''].map((c) => (
@@ -239,6 +240,7 @@ export default function TabUsuarios() {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

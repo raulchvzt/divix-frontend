@@ -81,7 +81,7 @@ export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false, 
       </div>
 
       {/* Precios */}
-      <div className="grid grid-cols-2 gap-4 mb-5">
+      <div className="grid grid-cols-2 gap-4 mb-5 [&>*]:min-w-0">
         <div>
           <p className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 mb-2">
             <ArrowDownLeft size={16} />
@@ -90,7 +90,7 @@ export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false, 
           {editando ? (
             <InputNumero decimales={4} value={compra} onChange={(e) => setCompra(e.target.value)} className={inputPrecio} />
           ) : (
-            <p className="text-[28px] font-bold tracking-tight">{sinTasa ? '—' : dinero(divisa.compra)}</p>
+            <p className="text-xl sm:text-[28px] font-bold tracking-tight [overflow-wrap:anywhere]">{sinTasa ? '—' : dinero(divisa.compra)}</p>
           )}
         </div>
 
@@ -102,7 +102,7 @@ export default function TarjetaDivisa({ divisa, onGuardar, puedeEditar = false, 
           {editando ? (
             <InputNumero decimales={4} value={venta} onChange={(e) => setVenta(e.target.value)} className={inputPrecio} />
           ) : (
-            <p className="text-[28px] font-bold tracking-tight">{sinTasa ? '—' : dinero(divisa.venta)}</p>
+            <p className="text-xl sm:text-[28px] font-bold tracking-tight [overflow-wrap:anywhere]">{sinTasa ? '—' : dinero(divisa.venta)}</p>
           )}
         </div>
       </div>

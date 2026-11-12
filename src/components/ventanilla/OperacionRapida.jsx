@@ -59,7 +59,7 @@ export default function OperacionRapida({ onRegistrada }) {
   }
 
   return (
-    <div className="bg-white border border-line rounded-2xl p-6 shadow-sm">
+    <div className="bg-white border border-line rounded-2xl p-4 sm:p-6 shadow-sm">
       {/* Encabezado */}
       <div className="flex items-start justify-between mb-5">
         <div>
@@ -90,7 +90,7 @@ export default function OperacionRapida({ onRegistrada }) {
       </div>
 
       {/* Campos */}
-      <div className="grid grid-cols-2 gap-x-5 gap-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-5">
         <div>
           <label className="block text-sm font-semibold mb-2">Divisa</label>
           <div className="relative">
@@ -122,7 +122,7 @@ export default function OperacionRapida({ onRegistrada }) {
         </div>
 
 
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
           <label className="block text-sm font-semibold mb-2">Tipo de cambio</label>
           <div className="flex items-center justify-between bg-slate-50 border border-line rounded-xl px-4 py-3.5 text-sm">
             <span className="text-slate-500">1 {divisa?.codigo} =</span>
@@ -135,10 +135,10 @@ export default function OperacionRapida({ onRegistrada }) {
       {aviso && <p className="text-sm font-medium text-brand-700 mt-4">{aviso}</p>}
 
       {/* Total y botón */}
-      <div className="mt-6 flex items-center justify-between bg-brand-50 rounded-xl px-5 py-4">
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3 bg-brand-50 rounded-xl px-4 sm:px-5 py-4">
         <div>
           <p className="text-xs font-semibold text-brand-700 mb-1">Importe en moneda nacional</p>
-          <p className="text-[28px] font-bold tracking-tight text-brand-700 leading-none">
+          <p className="text-2xl sm:text-[28px] font-bold tracking-tight text-brand-700 leading-none [overflow-wrap:anywhere]">
             {dinero(total)} <span className="text-sm font-semibold text-slate-500">MXN</span>
           </p>
         </div>

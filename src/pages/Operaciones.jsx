@@ -32,9 +32,9 @@ function Etiqueta({ tipo }) {
 
 function Resumen({ label, value }) {
   return (
-    <div className="bg-white border border-line rounded-2xl px-5 py-4 shadow-sm">
+    <div className="min-w-0 bg-white border border-line rounded-2xl px-4 sm:px-5 py-4 shadow-sm">
       <p className="text-sm text-slate-500 mb-1">{label}</p>
-      <p className="text-2xl font-bold tracking-tight">{value}</p>
+      <p className="text-xl sm:text-2xl font-bold tracking-tight [overflow-wrap:anywhere]">{value}</p>
     </div>
   )
 }
@@ -85,16 +85,16 @@ export default function Operaciones() {
   return (
     <div>
       {/* Encabezado */}
-      <div className="mb-8">
+      <div className="mb-6 lg:mb-8">
         <p className="text-sm text-slate-500">
           Operación / <span className="text-brand-600 font-medium">Operaciones</span>
         </p>
-        <h1 className="text-[32px] font-bold tracking-tight mt-2">Operaciones</h1>
+        <h1 className="text-2xl sm:text-[32px] font-bold tracking-tight mt-2">Operaciones</h1>
         <p className="text-sm text-slate-500 mt-1">Consulta el historial completo de transacciones.</p>
       </div>
 
       {/* Resumen de lo filtrado */}
-      <div className="grid grid-cols-3 gap-5 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 mb-6">
         <Resumen label="Operaciones" value={filtradas.length} />
         <Resumen label="Total compras" value={dinero(totalCompras)} />
         <Resumen label="Total ventas" value={dinero(totalVentas)} />
@@ -142,7 +142,8 @@ export default function Operaciones() {
         </div>
 
         {/* Tabla */}
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+      <table className="w-full min-w-[620px] text-sm">
           <thead>
             <tr className="bg-slate-50 border-y border-line">
               {columnas.map((c) => (
@@ -186,6 +187,7 @@ export default function Operaciones() {
             )}
           </tbody>
         </table>
+      </div>
 
         {/* Paginación */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-line">

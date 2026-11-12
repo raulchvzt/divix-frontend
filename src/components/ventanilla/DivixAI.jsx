@@ -48,7 +48,7 @@ function Texto({ children }) {
 const fechaCorta = (f) =>
   new Date(f).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 
-export default function DivixAI({ onClose }) {
+export default function DivixAI({ onClose, lleno = false }) {
   const [vista, setVista] = useState('chat') // 'chat' | 'historial'
   const [mensajes, setMensajes] = useState([]) // { rol: 'usuario' | 'asistente' | 'error', texto }
   const [idConversacion, setIdConversacion] = useState(leerGuardada)
@@ -56,7 +56,7 @@ export default function DivixAI({ onClose }) {
   const [enviando, setEnviando] = useState(false)
   const [historial, setHistorial] = useState(null)
   const [errorHistorial, setErrorHistorial] = useState('')
-  const fin = useRef(null)
+  const caja = useRef(null)
   const nombre = obtenerUsuario()?.nombre?.split(' ')[0] ?? ''
 
   const aMensajes = (turnos) =>
@@ -78,7 +78,9 @@ export default function DivixAI({ onClose }) {
   }, [])
 
   useEffect(() => {
-    fin.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    // Baja solo dentro del chat (no mueve toda la página).
+    const el = caja.current
+    if (el && mensajes.length > 0) el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
   }, [mensajes, enviando, vista])
 
   const nueva = () => {
@@ -132,7 +134,7 @@ export default function DivixAI({ onClose }) {
   }
 
   return (
-    <aside className="animar-panel bg-ink-800 text-white rounded-2xl p-6 shadow-lg">
+    <aside className={`animar-panel bg-ink-800 text-white rounded-2xl p-6 shadow-lg ${lleno ? 'h-full flex flex-col' : ''}`}>
       {/* Encabezado */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2 text-brand-500">
@@ -163,7 +165,7 @@ export default function DivixAI({ onClose }) {
       </h2>
 
       {vista === 'historial' ? (
-        <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto">
+        <div className={`flex flex-col gap-2 overflow-y-auto ${lleno ? 'flex-1 min-h-0' : 'max-h-[420px]'}`}>
           {errorHistorial && <p className="text-sm text-red-400">{errorHistorial}</p>}
           {!historial && !errorHistorial && <p className="text-sm text-slate-400">Cargando…</p>}
           {historial?.length === 0 && <p className="text-sm text-slate-400">Aún no has hecho consultas.</p>}
@@ -182,7 +184,7 @@ export default function DivixAI({ onClose }) {
         </div>
       ) : (
         <>
-          <div className="flex flex-col gap-3 max-h-[340px] overflow-y-auto pr-1 mb-4">
+          <div ref={caja} className={`flex flex-col gap-3 overflow-y-auto pr-1 mb-4 ${lleno ? 'flex-1 min-h-0' : 'max-h-[340px]'}`}>
             {mensajes.length === 0 && (
               <>
                 <div className="flex gap-3 bg-ink-700 border border-white/10 rounded-xl p-4">
@@ -223,7 +225,7 @@ export default function DivixAI({ onClose }) {
                   <div className="w-9 h-9 shrink-0 rounded-lg bg-brand-500/15 text-brand-500 flex items-center justify-center">
                     <Bot size={20} />
                   </div>
-                  <div className={`text-sm leading-relaxed ${m.rol === 'error' ? 'text-red-300' : 'text-slate-200'}`}>
+                  <div className={`min-w-0 flex-1 text-sm leading-relaxed [overflow-wrap:anywhere] ${m.rol === 'error' ? 'text-red-300' : 'text-slate-200'}`}>
                     <Texto>{m.texto}</Texto>
                   </div>
                 </div>
@@ -237,7 +239,6 @@ export default function DivixAI({ onClose }) {
                 <span>.</span>
               </p>
             )}
-            <div ref={fin} />
           </div>
 
           <form

@@ -22,7 +22,7 @@ export default function TiposDeCambio() {
         <p className="text-sm text-slate-500">
           Operación / <span className="text-brand-600 font-medium">Tipos de cambio</span>
         </p>
-        <h1 className="text-[32px] font-bold tracking-tight mt-2">Tipos de cambio</h1>
+        <h1 className="text-2xl sm:text-[32px] font-bold tracking-tight mt-2">Tipos de cambio</h1>
         <p className="text-sm text-slate-500 mt-1">
           Administra los precios de compra y venta de cada divisa. La referencia del mercado es solo
           informativa: tú decides el precio.
@@ -35,7 +35,7 @@ export default function TiposDeCambio() {
       {divisas && divisas.length === 0 && (
         <p className="text-sm text-slate-400">Aún no hay divisas con tipo de cambio registrado.</p>
       )}
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {divisas?.map((d) => (
           <TarjetaDivisa
             key={d.codigo}

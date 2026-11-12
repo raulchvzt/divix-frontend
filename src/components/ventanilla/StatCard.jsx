@@ -7,7 +7,7 @@ const tonos = {
 
 export default function StatCard({ icon: Icon, label, value, badge, tono = 'verde' }) {
   return (
-    <div className="bg-white border border-line rounded-2xl p-5 shadow-sm">
+    <div className="min-w-0 bg-white border border-line rounded-2xl p-4 sm:p-5 shadow-sm">
       <div className="flex items-start justify-between mb-5">
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${tonos[tono]}`}>
           <Icon size={20} strokeWidth={2} />
@@ -20,7 +20,7 @@ export default function StatCard({ icon: Icon, label, value, badge, tono = 'verd
         )}
       </div>
       <p className="text-sm text-slate-500 mb-1">{label}</p>
-      <p className="text-[26px] font-bold tracking-tight">{value}</p>
+      <p className="text-xl sm:text-[26px] font-bold tracking-tight leading-tight [overflow-wrap:anywhere]">{value}</p>
     </div>
   )
 }

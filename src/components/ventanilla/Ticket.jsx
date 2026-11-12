@@ -107,7 +107,7 @@ export default function Ticket({ operacion, onCerrar }) {
           </button>
         </div>
 
-        <div className="ticket-vista overflow-y-auto bg-slate-100 px-8 py-6 flex justify-center">
+        <div className="ticket-vista overflow-auto bg-slate-100 px-3 sm:px-8 py-6 flex justify-center">
           <div className="shadow-md">
             <Papel operacion={operacion} negocio={negocio} />
           </div>

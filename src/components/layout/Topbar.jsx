@@ -1,4 +1,4 @@
-import { Bell, LogOut } from 'lucide-react'
+import { Bell, LogOut, Menu } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { obtenerUsuario, cerrarSesion } from '../../api/auth'
 import { corteActivo } from '../../api/operaciones'
@@ -26,7 +26,7 @@ function fechaHoy() {
   return f.charAt(0).toUpperCase() + f.slice(1)
 }
 
-export default function Topbar() {
+export default function Topbar({ onMenu = () => {} }) {
   const navigate = useNavigate()
   const usuario = obtenerUsuario() ?? { nombre: 'Usuario', rol: '' }
   const { datos: corte } = useCarga(corteActivo)
@@ -37,25 +37,30 @@ export default function Topbar() {
   }
 
   return (
-    <header className="sticky top-0 z-10 h-[73px] bg-white border-b border-line flex items-center justify-between px-8">
-      <div>
-        <p className="text-xs text-slate-400 font-medium">{fechaHoy()}</p>
-        <p className="text-lg font-bold leading-tight">{saludo()}, {usuario.nombre.split(' ')[0]}</p>
+    <header className="sticky top-0 z-20 min-h-[73px] bg-white border-b border-line flex items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+      <button onClick={onMenu} title="Menú" className="lg:hidden -ml-1 p-2 text-slate-600 hover:text-slate-900">
+        <Menu size={24} />
+      </button>
+
+      <div className="min-w-0 mr-auto">
+        <p className="hidden sm:block text-xs text-slate-400 font-medium">{fechaHoy()}</p>
+        <p className="text-base sm:text-lg font-bold leading-tight truncate">{saludo()}, {usuario.nombre.split(' ')[0]}</p>
       </div>
 
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-3 sm:gap-5">
         {/* Estado de caja */}
         <div
+          title={corte ? 'Caja abierta' : 'Sin corte abierto'}
           className={`flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-full ${
             corte ? 'bg-brand-50 text-brand-700' : 'bg-slate-100 text-slate-500'
           }`}
         >
           <span className={`w-2 h-2 rounded-full ${corte ? 'bg-brand-500' : 'bg-slate-400'}`} />
-          {corte ? 'Caja abierta' : 'Sin corte abierto'}
+          <span className="hidden sm:inline">{corte ? 'Caja abierta' : 'Sin corte abierto'}</span>
         </div>
 
         {/* Notificaciones */}
-        <button className="relative text-slate-600 hover:text-slate-900">
+        <button className="hidden sm:block relative text-slate-600 hover:text-slate-900">
           <Bell size={22} strokeWidth={1.8} />
           <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-brand-500 ring-2 ring-white" />
         </button>
@@ -65,7 +70,7 @@ export default function Topbar() {
           <div className="w-9 h-9 rounded-full bg-ink-800 text-white text-xs font-bold flex items-center justify-center">
             {iniciales(usuario.nombre)}
           </div>
-          <div className="text-left leading-tight">
+          <div className="hidden md:block text-left leading-tight">
             <p className="text-sm font-semibold">{usuario.nombre}</p>
             <p className="text-[11px] text-slate-400">{ROLES[usuario.rol] ?? usuario.rol}</p>
           </div>

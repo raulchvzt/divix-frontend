@@ -33,7 +33,7 @@ export default function TablaTransacciones({ version = 0 }) {
   return (
     <div className="bg-white border border-line rounded-2xl shadow-sm overflow-hidden">
       {/* Encabezado */}
-      <div className="flex items-center justify-between px-6 py-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-5">
         <div>
           <h2 className="text-base font-bold">Últimas transacciones</h2>
           <p className="text-sm text-slate-500 mt-0.5">Movimientos registrados en tiempo real</p>
@@ -46,7 +46,7 @@ export default function TablaTransacciones({ version = 0 }) {
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               placeholder="Buscar..."
-              className="w-44 bg-white border border-line rounded-xl pl-10 pr-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition"
+              className="w-40 sm:w-44 bg-white border border-line rounded-xl pl-10 pr-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition"
             />
           </div>
           <button className="w-10 h-10 flex items-center justify-center border border-line rounded-xl text-slate-500 hover:bg-slate-50 transition-colors">
@@ -56,7 +56,8 @@ export default function TablaTransacciones({ version = 0 }) {
       </div>
 
       {/* Tabla */}
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto">
+      <table className="w-full min-w-[620px] text-sm">
         <thead>
           <tr className="bg-slate-50 border-y border-line">
             {columnas.map((c) => (
@@ -104,6 +105,7 @@ export default function TablaTransacciones({ version = 0 }) {
           )}
         </tbody>
       </table>
+      </div>
     </div>
   )
 }

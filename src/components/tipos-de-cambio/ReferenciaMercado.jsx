@@ -76,23 +76,33 @@ export default function ReferenciaMercado({ mercado: m, puedeEditar, onUsarSuger
       )}
 
       {puedeEditar && m.sugerencia && (
-        <button
-          onClick={() => onUsarSugerencia(m.sugerencia)}
-          title="Mismo margen frente al mercado que tenías al poner tus precios. Puedes ajustarlo antes de guardar."
-          className={`mt-3 w-full flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold border ${
-            seMovioMucho
-              ? 'bg-amber-500 border-amber-500 text-white hover:bg-amber-600'
-              : 'bg-white border-line text-slate-600 hover:bg-slate-100'
-          }`}
-        >
-          <Wand2 size={16} className="shrink-0" />
-          <span className="text-left leading-tight">
-            Usar sugerencia
-            <span className="block font-medium opacity-80">
-              Compra {precio(Number(m.sugerencia.compra))} · Venta {precio(Number(m.sugerencia.venta))}
+        <>
+          <button
+            onClick={() => onUsarSugerencia(m.sugerencia)}
+            title="Solo llena los campos: puedes ajustar los precios antes de guardar."
+            className={`mt-3 w-full flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold border ${
+              m.estado === 'perdida'
+                ? 'bg-red-600 border-red-600 text-white hover:bg-red-700'
+                : seMovioMucho
+                  ? 'bg-amber-500 border-amber-500 text-white hover:bg-amber-600'
+                  : 'bg-white border-line text-slate-600 hover:bg-slate-100'
+            }`}
+          >
+            <Wand2 size={16} className="shrink-0" />
+            <span className="text-left leading-tight">
+              Usar sugerencia
+              <span className="block font-medium opacity-80">
+                Compra {precio(Number(m.sugerencia.compra))} · Venta {precio(Number(m.sugerencia.venta))}
+              </span>
             </span>
-          </span>
-        </button>
+          </button>
+          {/* De dónde sale la sugerencia */}
+          <p className="mt-2 text-[11px] text-slate-500">
+            {m.sugerencia.motivo === 'centrar_en_mercado'
+              ? `Tu margen habitual (${m.sugerencia.margenPct}% a cada lado) alrededor del precio del mercado.`
+              : 'Conserva el margen que tenías frente al mercado cuando pusiste tus precios.'}
+          </p>
+        </>
       )}
     </div>
   )

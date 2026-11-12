@@ -3,6 +3,8 @@ import { Wallet, Vault, ArrowRightLeft, Check } from 'lucide-react'
 import { dinero } from '../utils/formato'
 import { useCarga } from '../api/useCarga'
 import InputNumero from '../components/InputNumero'
+import SelectorBilletes from '../components/SelectorBilletes'
+import { billetesVacios, billetesValidos, cantidadBilletes } from '../utils/billetes'
 import {
   obtenerCorteActivo,
   obtenerUltimoCierre,
@@ -22,6 +24,15 @@ const hora = (f) => new Date(f).toLocaleTimeString('es-MX')
 // En el conteo de dólares se captura el IMPORTE de cada denominación y se calcula cuántos billetes son.
 const totalUSD = (importes) => denominaciones.reduce((total, valor) => total + Number(importes[valor] || 0), 0)
 const cuantosBilletes = (valor, importe) => (importe === '' ? null : Number(importe) / valor)
+/** Del conteo por importe al mapa de billetes que guarda el backend: { "100": 25, ... }. */
+const conteoABilletes = (importes) =>
+  Object.fromEntries(denominaciones.map((valor) => [String(valor), Math.round(Number(importes[valor] || 0) / valor)]))
+/** "falta 1 de $20, sobra 1 de $10" a partir de las diferencias por billete. */
+const describirDiferencias = (dif) =>
+  denominaciones
+    .filter((valor) => dif?.[valor])
+    .map((valor) => `${dif[valor] < 0 ? 'falta' : 'sobra'}${Math.abs(dif[valor]) === 1 ? '' : 'n'} ${Math.abs(dif[valor])} de $${valor}`)
+    .join(', ')
 const etiquetaMovimiento = { entrada: 'entrada', salida: 'salida', reposicion: 'reposición' }
 
 const inputClase = 'w-full rounded-lg border border-line bg-white px-3 py-2 text-sm'
@@ -39,6 +50,7 @@ export default function Caja() {
   const [corte, setCorte] = useState(false)
   const [reposicion, setReposicion] = useState('')
   const [movimiento, setMovimiento] = useState({ moneda: 'MXN', tipo: 'entrada', monto: '', concepto: '' })
+  const [billetesMovimiento, setBilletesMovimiento] = useState(billetesVacios)
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
   const [enviando, setEnviando] = useState(false)
@@ -52,6 +64,8 @@ export default function Caja() {
         reserva: num(origen.esperados.reserva),
         saldos: Object.fromEntries(monedas.map((m) => [m, num(origen.esperados[m])])),
         movimientos: origen.movimientos,
+        // Billetes de USD que debería haber ahora (null si la caja se abrió sin conteo por billete)
+        billetes: origen.billetes?.esperados ? origen.billetes : null,
       }
     : ultimo
       ? {
@@ -62,8 +76,10 @@ export default function Caja() {
             monedas.map((m) => [m, m === 'MXN' ? num(ultimo.efectivoFinal) : num(ultimo.saldosFinales?.[m])]),
           ),
           movimientos: [],
+          billetes: ultimo.billetesFinales ? { esperados: ultimo.billetesFinales, completo: true } : null,
         }
       : null
+  const disponiblesUSD = caja?.billetes?.completo ? caja.billetes.esperados : null
 
   // Ejecuta una llamada al backend mostrando error o aviso, y recarga los datos.
   async function ejecutar(accion, aviso) {
@@ -91,7 +107,13 @@ export default function Caja() {
         .map((m) => [m, String(m === 'USD' ? totalUSD(billetes) : importe(fondos[m]))]),
     )
     ejecutar(
-      () => abrirCorte({ efectivoInicial: String(importe(fondos.MXN)), reservaInicial: String(importe(reserva)), saldosIniciales }),
+      () =>
+        abrirCorte({
+          efectivoInicial: String(importe(fondos.MXN)),
+          reservaInicial: String(importe(reserva)),
+          saldosIniciales,
+          billetesIniciales: conteoABilletes(billetes),
+        }),
       'Fondo inicial guardado. Caja abierta.',
     )
   }
@@ -103,6 +125,7 @@ export default function Caja() {
           efectivoInicial: ultimo.efectivoFinal,
           reservaInicial: ultimo.reservaFinal,
           saldosIniciales: ultimo.saldosFinales ?? {},
+          ...(ultimo.billetesFinales ? { billetesIniciales: ultimo.billetesFinales } : {}),
         }),
       'Nueva apertura con los saldos del último corte.',
     )
@@ -117,8 +140,15 @@ export default function Caja() {
     if (ok) setReposicion('')
   }
 
+  const movimientoUsd = movimiento.moneda === 'USD'
+  const modoMovimiento = movimiento.tipo === 'salida' ? 'entregar' : 'recibir'
+
   async function registrar(event) {
     event.preventDefault()
+    if (movimientoUsd && !billetesValidos(movimiento.monto, modoMovimiento, disponiblesUSD, billetesMovimiento)) {
+      setError('Revisa los billetes: deben sumar el importe y no puedes sacar más de los que hay en caja.')
+      return
+    }
     const ok = await ejecutar(
       () =>
         registrarMovimiento(origen.id, {
@@ -126,6 +156,7 @@ export default function Caja() {
           moneda: movimiento.moneda,
           monto: String(importe(movimiento.monto)),
           concepto: movimiento.concepto.trim(),
+          ...(movimientoUsd ? { billetes: billetesMovimiento } : {}),
         }),
       'Movimiento registrado.',
     )
@@ -145,13 +176,15 @@ export default function Caja() {
           efectivoFinal: String(importe(contado.MXN)),
           reservaFinal: String(importe(reservaContada)),
           saldosFinales,
+          billetesFinales: conteoABilletes(billetes),
         }),
       'Corte guardado. El efectivo contado será el fondo de la siguiente apertura.',
     )
     if (ok) setCorte(false)
   }
 
-  function conteoUSD() {
+  // esperados: billetes que debería haber (solo al cerrar), para comparar cada fila.
+  function conteoUSD(esperados = null) {
     return (
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -167,6 +200,13 @@ export default function Caja() {
               </td>
               <td className={`text-right font-medium ${noCuadra ? 'text-red-600' : ''}`}>
                 {cantidad === null ? '—' : noCuadra ? 'No cuadra' : `${cantidad.toLocaleString('en-US')} ${cantidad === 1 ? 'billete' : 'billetes'}`}
+                {esperados && (() => {
+                  const debe = esperados[valor] ?? 0
+                  const dif = cantidad === null || noCuadra ? 0 : cantidad - debe
+                  return <span className={`block text-xs font-normal ${dif ? 'text-amber-700' : 'text-slate-400'}`}>
+                    Esperado: {debe}{dif !== 0 && ` · ${dif < 0 ? 'falta' : 'sobra'}${Math.abs(dif) === 1 ? '' : 'n'} ${Math.abs(dif)}`}
+                  </span>
+                })()}
               </td>
             </tr>
           })}</tbody>
@@ -201,7 +241,33 @@ export default function Caja() {
         </div>
         <section className="mb-6 rounded-2xl border border-line bg-white p-6"><div className="mb-4 flex flex-wrap justify-between gap-2"><h2 className="font-bold">Saldos por moneda</h2><span className="text-sm text-slate-500">{caja.estado === 'abierta' ? 'Caja abierta' : 'Caja cerrada'} · {caja.fecha}</span></div><div className="grid grid-cols-2 gap-4 md:grid-cols-5">{monedas.filter((moneda) => moneda !== 'MXN').map((moneda) => <div key={moneda} className="min-w-0"><p className="text-sm text-slate-500">{moneda}</p><p className="mt-1 text-lg font-bold [overflow-wrap:anywhere]">{dinero(caja.saldos[moneda])}</p></div>)}</div></section>
 
-        {caja.estado === 'cerrada' && <section className="mb-6 rounded-2xl border border-line bg-white p-6"><h2 className="mb-3 flex items-center gap-2 font-bold"><Check size={20} className="text-brand-600" /> Corte guardado · {caja.fecha}</h2><p className="mb-4 text-sm text-slate-500">Estos saldos contados se conservarán para la siguiente apertura.</p><div className="mb-5 flex flex-wrap gap-4 text-sm">{monedas.map((moneda) => <span key={moneda}>{moneda} {moneda === 'MXN' ? '(cajero)' : ''}: diferencia {dinero(num(ultimo.diferencias?.[moneda]))}</span>)}<span>Caja fuerte MXN: diferencia {dinero(num(ultimo.diferencias?.reserva))}</span></div><button className={botonClase} onClick={abrirConUltimoCierre} disabled={enviando}>Abrir con el último cierre</button></section>}
+        {/* Billetes de USD por denominación */}
+        <section className="mb-6 rounded-2xl border border-line bg-white p-6">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-bold">Billetes de USD</h2>
+            {caja.billetes && <span className="text-sm text-slate-500">{cantidadBilletes(caja.billetes.esperados).toLocaleString('en-US')} billetes · {dinero(denominaciones.reduce((t, valor) => t + valor * (caja.billetes.esperados[valor] ?? 0), 0))}</span>}
+          </div>
+          {!caja.billetes ? (
+            <p className="text-sm text-slate-500">Esta caja se abrió sin el conteo por billete. A partir de la próxima apertura se llevará el control de cada denominación.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+                {denominaciones.map((valor) => {
+                  const n = caja.billetes.esperados[valor] ?? 0
+                  return <div key={valor} className={`rounded-xl border px-4 py-3 ${n === 0 ? 'border-line bg-slate-50' : 'border-line bg-white'}`}>
+                    <p className="text-sm font-semibold text-slate-500">${valor}</p>
+                    <p className={`mt-1 text-2xl font-bold ${n === 0 ? 'text-slate-300' : ''}`}>{n.toLocaleString('en-US')}</p>
+                    <p className="text-xs text-slate-400">{n === 1 ? 'billete' : 'billetes'} · {dinero(n * valor)}</p>
+                  </div>
+                })}
+              </div>
+              {!caja.billetes.completo && <p className="mt-3 text-xs text-amber-700">Hay operaciones o movimientos de USD sin detalle de billetes, así que estas cantidades son aproximadas.</p>}
+              {caja.estado === 'cerrada' && <p className="mt-3 text-xs text-slate-500">Billetes contados en el último corte.</p>}
+            </>
+          )}
+        </section>
+
+        {caja.estado === 'cerrada' && <section className="mb-6 rounded-2xl border border-line bg-white p-6"><h2 className="mb-3 flex items-center gap-2 font-bold"><Check size={20} className="text-brand-600" /> Corte guardado · {caja.fecha}</h2><p className="mb-4 text-sm text-slate-500">Estos saldos contados se conservarán para la siguiente apertura.</p><div className="mb-5 flex flex-wrap gap-4 text-sm">{monedas.map((moneda) => <span key={moneda}>{moneda} {moneda === 'MXN' ? '(cajero)' : ''}: diferencia {dinero(num(ultimo.diferencias?.[moneda]))}</span>)}<span>Caja fuerte MXN: diferencia {dinero(num(ultimo.diferencias?.reserva))}</span>{describirDiferencias(ultimo.diferenciasBilletes) && <span className="w-full font-medium text-amber-700">Billetes USD: {describirDiferencias(ultimo.diferenciasBilletes)}</span>}</div><button className={botonClase} onClick={abrirConUltimoCierre} disabled={enviando}>Abrir con el último cierre</button></section>}
 
         {caja.estado === 'abierta' && (corte ? <form onSubmit={cerrar} className="rounded-2xl border border-line bg-white p-6"><h2 className="text-lg font-bold">Conteo de cierre</h2><p className="mt-1 mb-6 text-sm text-slate-500">Cuenta el efectivo real. Diferencia positiva: sobrante; negativa: faltante. Los campos vacíos no se consideran cero.</p><div className="grid gap-8 lg:grid-cols-2"><div className="space-y-4">
           {[...monedas.filter((moneda) => moneda !== 'USD'), 'reserva'].map((moneda) => {
@@ -210,9 +276,10 @@ export default function Caja() {
             const esperado = esReserva ? caja.reserva : caja.saldos[moneda]
             return <label key={moneda} className="block text-sm font-medium">{esReserva ? 'Caja fuerte · MXN' : moneda === 'MXN' ? 'Cajero · MXN' : moneda}<InputNumero className={`${inputClase} mt-2`} min="0" required value={valor} onChange={(event) => esReserva ? setReservaContada(event.target.value) : setContado({ ...contado, [moneda]: event.target.value })} /><span className="mt-1 block text-xs text-slate-500">Esperado: {dinero(esperado)}{valor !== '' && ` · Diferencia: ${dinero(importe(valor) - esperado)}`}</span></label>
           })}
-        </div><div><h3 className="mb-3 font-semibold">Conteo de dólares</h3>{conteoUSD()}<p className="text-sm text-slate-500">Esperado: {dinero(caja.saldos.USD)}{denominaciones.every((valor) => billetes[valor] !== '') && ` · Diferencia: ${dinero(totalUSD(billetes) - caja.saldos.USD)}`}</p></div></div><div className="mt-6 flex gap-3"><button type="submit" disabled={enviando} className={botonClase}>Confirmar y cerrar caja</button><button type="button" className="rounded-xl border border-line px-5 py-3 text-sm font-semibold" onClick={() => setCorte(false)}>Cancelar</button></div></form> : <div className="mb-6 grid items-start gap-5 lg:grid-cols-2">
+        </div><div><h3 className="mb-3 font-semibold">Conteo de dólares</h3>{conteoUSD(disponiblesUSD)}<p className="text-sm text-slate-500">Esperado: {dinero(caja.saldos.USD)}{denominaciones.every((valor) => billetes[valor] !== '') && ` · Diferencia: ${dinero(totalUSD(billetes) - caja.saldos.USD)}`}</p></div></div><div className="mt-6 flex gap-3"><button type="submit" disabled={enviando} className={botonClase}>Confirmar y cerrar caja</button><button type="button" className="rounded-xl border border-line px-5 py-3 text-sm font-semibold" onClick={() => setCorte(false)}>Cancelar</button></div></form> : <div className="mb-6 grid items-start gap-5 lg:grid-cols-2">
           <form onSubmit={reponer} className="rounded-2xl border border-line bg-white p-6"><h2 className="font-bold">Reposición al cajero</h2><p className="mt-1 mb-4 text-sm text-slate-500">Traslada pesos de la caja fuerte al cajero. No modifica el total.</p><label className="block text-sm font-medium">Importe MXN<InputNumero className={`${inputClase} mt-2`} min="0.01" required value={reposicion} onChange={(event) => setReposicion(event.target.value)} /></label><button type="submit" disabled={enviando} className={`${botonClase} mt-4`}>Registrar reposición</button></form>
-          <form onSubmit={registrar} className="rounded-2xl border border-line bg-white p-6"><h2 className="mb-4 font-bold">Entrada o salida de efectivo</h2><div className="grid grid-cols-2 gap-3"><label className="text-sm">Moneda<select className={`${inputClase} mt-2`} value={movimiento.moneda} onChange={(event) => setMovimiento({ ...movimiento, moneda: event.target.value })}>{monedas.map((moneda) => <option key={moneda}>{moneda}</option>)}</select></label><label className="text-sm">Movimiento<select className={`${inputClase} mt-2`} value={movimiento.tipo} onChange={(event) => setMovimiento({ ...movimiento, tipo: event.target.value })}><option value="entrada">Entrada</option><option value="salida">Salida</option></select></label><label className="text-sm">Importe<InputNumero className={`${inputClase} mt-2`} min="0.01" required value={movimiento.monto} onChange={(event) => setMovimiento({ ...movimiento, monto: event.target.value })} /></label><label className="text-sm">Concepto<input className={`${inputClase} mt-2`} required maxLength="120" value={movimiento.concepto} onChange={(event) => setMovimiento({ ...movimiento, concepto: event.target.value })} /></label></div><p className="mt-3 text-xs text-slate-500">Los movimientos MXN afectan la caja del cajero. Las compras y ventas de Ventanilla ya se reflejan solas; usa esto para otros movimientos de efectivo.</p><button type="submit" disabled={enviando} className={`${botonClase} mt-4`}>Guardar movimiento</button></form>
+          <form onSubmit={registrar} className="rounded-2xl border border-line bg-white p-6"><h2 className="mb-4 font-bold">Entrada o salida de efectivo</h2><div className="grid grid-cols-2 gap-3"><label className="text-sm">Moneda<select className={`${inputClase} mt-2`} value={movimiento.moneda} onChange={(event) => setMovimiento({ ...movimiento, moneda: event.target.value })}>{monedas.map((moneda) => <option key={moneda}>{moneda}</option>)}</select></label><label className="text-sm">Movimiento<select className={`${inputClase} mt-2`} value={movimiento.tipo} onChange={(event) => setMovimiento({ ...movimiento, tipo: event.target.value })}><option value="entrada">Entrada</option><option value="salida">Salida</option></select></label><label className="text-sm">Importe<InputNumero className={`${inputClase} mt-2`} decimales={movimientoUsd ? 0 : 2} min={movimientoUsd ? '1' : '0.01'} required value={movimiento.monto} onChange={(event) => setMovimiento({ ...movimiento, monto: event.target.value })} /></label><label className="text-sm">Concepto<input className={`${inputClase} mt-2`} required maxLength="120" value={movimiento.concepto} onChange={(event) => setMovimiento({ ...movimiento, concepto: event.target.value })} /></label></div>
+          {movimientoUsd && Number(movimiento.monto) > 0 && <div className="mt-4"><SelectorBilletes monto={movimiento.monto} modo={modoMovimiento} disponibles={disponiblesUSD} value={billetesMovimiento} onChange={setBilletesMovimiento} /></div>}<p className="mt-3 text-xs text-slate-500">Los movimientos MXN afectan la caja del cajero. Las compras y ventas de Ventanilla ya se reflejan solas; usa esto para otros movimientos de efectivo.</p><button type="submit" disabled={enviando} className={`${botonClase} mt-4`}>Guardar movimiento</button></form>
         </div>)}
 
         {caja.movimientos.length > 0 && <section className="mt-6 rounded-2xl border border-line bg-white p-6"><h2 className="mb-4 font-bold">Movimientos del turno</h2><div className="overflow-x-auto"><table className="w-full text-left text-sm"><thead className="text-slate-500"><tr><th className="pb-3">Hora</th><th>Movimiento</th><th>Concepto</th><th>Moneda</th><th className="text-right">Importe</th></tr></thead><tbody>{caja.movimientos.map((item) => <tr key={item.id} className="border-t border-line"><td className="py-3 pr-3">{hora(item.fechaHora)}</td><td className="pr-3">{etiquetaMovimiento[item.tipoMovimiento]}</td><td className="pr-3">{item.concepto}</td><td>{item.moneda}</td><td className="text-right">{dinero(num(item.monto))}</td></tr>)}</tbody></table></div></section>}

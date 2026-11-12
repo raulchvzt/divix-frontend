@@ -11,6 +11,7 @@ import { useLayoutEffect, useRef } from 'react'
  * Props extra:
  *  - decimales: cuántos decimales se permiten (0 para solo enteros). Default 2.
  *  - min: valor mínimo; si no se cumple, el formulario no se envía.
+ *  - multiploDe: el valor debe ser múltiplo de este número (p. ej. billetes de 100).
  */
 
 /** Deja solo dígitos y un punto decimal, con el máximo de decimales indicado. */
@@ -33,7 +34,7 @@ function formatear(limpio) {
 /** Cuántos caracteres "útiles" (dígitos o punto) hay antes de la posición dada. */
 const utilesAntes = (texto, pos) => texto.slice(0, pos).replace(/[^\d.]/g, '').length
 
-export default function InputNumero({ value, onChange, decimales = 2, min, ...props }) {
+export default function InputNumero({ value, onChange, decimales = 2, min, multiploDe, ...props }) {
   const ref = useRef(null)
   const cursor = useRef(null)
   const mostrado = formatear(limpiar(value, decimales))
@@ -57,9 +58,16 @@ export default function InputNumero({ value, onChange, decimales = 2, min, ...pr
     const input = ref.current
     if (!input) return
     const numero = parseFloat(limpiar(value, decimales))
-    const invalido = min !== undefined && value !== '' && !(numero >= Number(min))
-    input.setCustomValidity(invalido ? `El valor mínimo es ${formatear(String(min))}.` : '')
-  }, [value, min, decimales])
+    const bajoMinimo = min !== undefined && value !== '' && !(numero >= Number(min))
+    const noMultiplo = multiploDe && value !== '' && numero % Number(multiploDe) !== 0
+    input.setCustomValidity(
+      bajoMinimo
+        ? `El valor mínimo es ${formatear(String(min))}.`
+        : noMultiplo
+          ? `Debe ser múltiplo de ${formatear(String(multiploDe))}.`
+          : '',
+    )
+  }, [value, min, multiploDe, decimales])
 
   const cambiar = (e) => {
     const texto = e.target.value
